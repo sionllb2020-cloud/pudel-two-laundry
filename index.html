@@ -303,7 +303,7 @@ button:active {
 body.dark-theme #previousHistorySection h3 { color: #EAF2F6; }
 
 .btn-print { background: #304B5A; color: white; }
-.btn-excel { background: #237A4B; color: white; }
+.btn-excel { background: #237A4B; color: white; font-size: 11.5px; height: 38px; padding: 0 14px; }
 .action-btn {
     height: 32px;
     min-width: 46px;
@@ -1139,8 +1139,7 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
         </section>
         <div class="print-total" id="printTotal">Pendapatan Hari Ini: Rp 0</div>
         <div class="bottom-actions">
-            <button class="btn-excel" id="excelBtn" type="button">EXPORT EXCEL</button>
-            <label for="excelUpload" class="btn-upload" title="Upload Excel ke History">UPLOAD EXCEL</label>
+            <button class="btn-excel" id="excelBtn" type="button" title="Export Excel">EXPORT EXCEL</button>
         </div>
         <input type="file" id="excelUpload" accept=".xls" style="display:none;">
     </div>
@@ -1239,6 +1238,12 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
                         <button type="button" class="btn-green" id="admEditSave" style="height:46px;">SIMPAN</button>
                     </div>
                 </div>
+            </div>
+
+            <div class="adm-section">
+                <h4>Upload / Import Data Excel</h4>
+                <p>Upload file Excel (.xls) hasil export untuk mengimpor data pembukuan ke dalam sistem.</p>
+                <label for="excelUpload" class="btn-upload" style="font-size:12px; height:40px; cursor:pointer;" title="Upload Excel ke History">UPLOAD EXCEL</label>
             </div>
 
             <div class="adm-section">
@@ -2228,52 +2233,60 @@ function loadLogoImage() {
 }
 
 function drawReceiptCanvas(it, logoImg) {
-    const W = 384, S = 2, PAD = 14, CW = W - PAD * 2;
-    const FONT = "'Courier New', Courier, monospace";
+    const W = 384; // Ukuran 58mm POS thermal standard (printable area 384px)
+    const S = 2;   // Skala 2x Retina untuk hasil gambar super tajam dan jernih
+    const PAD = 16;
+    const CW = W - PAD * 2;
+    const FONT = "'Courier New', Courier, Consolas, monospace";
     const lunas = it.bayar === "SUDAH";
     const jenisFull = getJenisLaundryFullName(it.jenis);
     const pay = getPayInfo(it);
+    const teeth = 24;
+    const toothH = 8;
+    const tw = W / teeth;
 
     const items = [];
-    items.push({ k: "gap", h: 2 });
-    items.push({ k: "logo" });
-    items.push({ k: "t", s: storeInfo.name, sz: 17, b: true, a: "c" });
-    items.push({ k: "t", s: storeInfo.tagline, sz: 12, b: true, a: "c" });
-    items.push({ k: "t", s: storeInfo.address, sz: 11, a: "c" });
-    items.push({ k: "t", s: "Telp/WA: " + storeInfo.phone, sz: 11, a: "c" });
-    items.push({ k: "div", style: "dash" });
-    items.push({ k: "row", l: "No. Struk", r: receiptNo(it), b2: true });
-    items.push({ k: "row", l: "Tanggal", r: it.tanggal });
-    items.push({ k: "row", l: "Waktu", r: it.waktu });
-    items.push({ k: "row", l: "Customer", r: it.nama, b2: true });
-    items.push({ k: "div", style: "dash" });
-    items.push({ k: "t", s: "LAYANAN", sz: 13, b: true, a: "l" });
-    items.push({ k: "t", s: jenisFull, sz: 13, b: true, a: "l" });
-    if (Number(it.plastik) > 0) items.push({ k: "row", l: "• Plastik", r: it.plastik + " Pcs" });
-    if (Number(it.sabun) > 0) items.push({ k: "row", l: "• Sabun Cuci", r: it.sabun + " Sachet" });
-    if (Number(it.pewangi) > 0) items.push({ k: "row", l: "• Pewangi", r: it.pewangi + " Sachet" });
-    items.push({ k: "div", style: "dash" });
-    items.push({ k: "stamp", l: "Status", r: lunas ? "LUNAS" : "BELUM", c: lunas ? "#059669" : "#dc2626", ok: lunas });
-    if (lunas) items.push({ k: "row", l: "Metode", r: it.metode || "-", b2: true });
-    items.push({ k: "div", style: "solid" });
-    items.push({ k: "row", l: "TOTAL", r: formatRupiah(it.harga), sz: 17, b: true });
-    if (lunas) {
-        items.push({ k: "row", l: "Uang Bayar", r: formatRupiah(pay.uang), b2: true });
-        items.push({ k: "row", l: "Kembalian", r: formatRupiah(pay.kembali), b2: true });
-    }
-    items.push({ k: "div", style: "dash" });
     items.push({ k: "gap", h: 4 });
-    items.push({ k: "t", s: "TERIMA KASIH BANYAK", sz: 13, b: true, a: "c" });
-    items.push({ k: "t", s: storeInfo.footer, sz: 11, a: "c" });
-    items.push({ k: "t", s: "*** " + storeInfo.name + " ***", sz: 12, b: true, a: "c" });
+    items.push({ k: "logo" });
+    items.push({ k: "t", s: storeInfo.name, sz: 14, b: true, a: "c", up: true });
+    items.push({ k: "t", s: storeInfo.tagline, sz: 10.5, b: true, a: "c" });
+    items.push({ k: "t", s: storeInfo.address, sz: 9.5, a: "c" });
+    items.push({ k: "t", s: "Telp/WA: " + storeInfo.phone, sz: 9.5, a: "c" });
+    items.push({ k: "div", style: "dash" });
+    items.push({ k: "row", l: "No. Struk", r: receiptNo(it), b2: true, sz: 10.5 });
+    items.push({ k: "row", l: "Tanggal", r: it.tanggal, sz: 10.5 });
+    items.push({ k: "row", l: "Waktu", r: it.waktu, sz: 10.5 });
+    items.push({ k: "row", l: "Customer", r: it.nama, b2: true, sz: 10.5 });
+    items.push({ k: "div", style: "dash" });
+    items.push({ k: "t", s: "LAYANAN", sz: 10.5, b: true, a: "l" });
+    items.push({ k: "t", s: jenisFull, sz: 10.5, b: true, a: "l" });
+    if (Number(it.plastik) > 0) items.push({ k: "row", l: "• Plastik", r: it.plastik + " Pcs", sz: 10.5 });
+    if (Number(it.sabun) > 0) items.push({ k: "row", l: "• Sabun Cuci", r: it.sabun + " Sachet", sz: 10.5 });
+    if (Number(it.pewangi) > 0) items.push({ k: "row", l: "• Pewangi", r: it.pewangi + " Sachet", sz: 10.5 });
+    items.push({ k: "div", style: "dash" });
+    items.push({ k: "stamp", l: "Status", r: lunas ? "LUNAS" : "BELUM", c: lunas ? "#059669" : "#dc2626", ok: lunas, sz: 10.5 });
+    if (lunas) items.push({ k: "row", l: "Metode", r: it.metode || "-", b2: true, sz: 10.5 });
+    items.push({ k: "div", style: "double" });
+    items.push({ k: "row", l: "TOTAL", r: formatRupiah(it.harga), sz: 13, b: true });
+    items.push({ k: "div", style: "double" });
+    if (lunas) {
+        items.push({ k: "row", l: "Uang Bayar", r: formatRupiah(pay.uang), b2: true, sz: 10.5 });
+        items.push({ k: "row", l: "Kembalian", r: formatRupiah(pay.kembali), b2: true, sz: 10.5 });
+        items.push({ k: "div", style: "double" });
+    }
+    items.push({ k: "gap", h: 4 });
+    items.push({ k: "t", s: "TERIMA KASIH BANYAK", sz: 10, b: true, a: "c" });
+    items.push({ k: "t", s: storeInfo.footer, sz: 9.5, a: "c" });
+    items.push({ k: "t", s: "*** " + storeInfo.name + " ***", sz: 10, b: true, a: "c" });
+    items.push({ k: "gap", h: 6 });
 
     function run(ctx, draw) {
-        let y = 16;
+        let y = toothH + 6;
         ctx.textBaseline = "top";
-        const setF = (sz, b) => { ctx.font = (b ? "bold " : "") + sz + "px " + FONT; };
+        const setF = (sz, b) => { ctx.font = (b ? "900 " : "") + sz + "px " + FONT; };
         const wrap = (s, sz, b, maxW) => {
             setF(sz, b);
-            const words = String(s).split(/\s+/);
+            const words = String(s || "").split(/\s+/);
             const lines = [];
             let cur = "";
             words.forEach(w => {
@@ -2286,7 +2299,7 @@ function drawReceiptCanvas(it, logoImg) {
         };
         const text = (s, x, yy, align, color) => {
             ctx.textAlign = align;
-            ctx.fillStyle = color || "#000";
+            ctx.fillStyle = color || "#000000";
             ctx.fillText(s, x, yy);
         };
 
@@ -2296,14 +2309,15 @@ function drawReceiptCanvas(it, logoImg) {
             } else if (m.k === "logo") {
                 if (logoImg && logoImg.naturalWidth) {
                     const ratio = logoImg.naturalWidth / logoImg.naturalHeight;
-                    let h = 66, w = h * ratio;
-                    if (w > 120) { w = 120; h = w / ratio; }
+                    let h = 60, w = h * ratio;
+                    if (w > 80) { w = 80; h = w / ratio; }
                     if (draw) ctx.drawImage(logoImg, (W - w) / 2, y, w, h);
-                    y += h + 6;
+                    y += h + 4;
                 }
             } else if (m.k === "t") {
-                const lh = Math.round(m.sz * 1.4);
-                wrap(m.s, m.sz, m.b, CW).forEach(line => {
+                const lh = Math.round(m.sz * 1.35);
+                const str = m.up ? String(m.s).toUpperCase() : String(m.s);
+                wrap(str, m.sz, m.b, CW).forEach(line => {
                     if (draw) {
                         setF(m.sz, m.b);
                         if (m.a === "c") text(line, W / 2, y, "center");
@@ -2312,53 +2326,53 @@ function drawReceiptCanvas(it, logoImg) {
                     y += lh;
                 });
             } else if (m.k === "row" || m.k === "stamp") {
-                const sz = m.sz || 13;
-                const lh = Math.round(sz * 1.45);
+                const sz = m.sz || 10.5;
+                const lh = Math.round(sz * 1.4);
                 const isStamp = m.k === "stamp";
                 setF(sz, m.b);
                 const lw = ctx.measureText(m.l).width;
                 setF(sz, m.b || m.b2 || isStamp);
-                const rw = ctx.measureText(m.r).width + (isStamp ? 14 + 18 : 0);
-                if (lw + rw + 10 <= CW) {
+                const rw = ctx.measureText(m.r).width + (isStamp ? 14 + 16 : 0);
+                if (lw + rw + 8 <= CW) {
                     if (draw) {
                         setF(sz, m.b);
                         text(m.l, PAD, y, "left");
                         setF(sz, m.b || m.b2 || isStamp);
                         if (isStamp) {
-                            const bx = PAD + CW - rw, by = y - 2, bh = lh;
+                            const badgeH = Math.round(lh * 1.05);
+                            const bx = PAD + CW - rw - 4, by = y - 1, bw = rw + 8;
                             ctx.save();
                             ctx.setLineDash([3, 2]);
                             ctx.lineWidth = 1.5;
                             ctx.strokeStyle = m.c;
-                            ctx.strokeRect(bx, by, rw, bh);
+                            ctx.strokeRect(bx, by, bw, badgeH);
                             ctx.restore();
-                            // ikon ceklis / silang digambar langsung agar selalu jelas
-                            const ix = bx + 8, cy = y + lh / 2 - 2;
+                            // Gambar ikon ceklis / silang tajam
+                            const ix = bx + 6, cy = by + badgeH / 2;
                             ctx.save();
                             ctx.strokeStyle = m.c;
-                            ctx.lineWidth = 2.6;
+                            ctx.lineWidth = 2.4;
                             ctx.lineCap = "round";
                             ctx.lineJoin = "round";
-                            ctx.setLineDash([]);
                             ctx.beginPath();
                             if (m.ok) {
                                 ctx.moveTo(ix, cy);
-                                ctx.lineTo(ix + 4, cy + 4.5);
-                                ctx.lineTo(ix + 11, cy - 4.5);
+                                ctx.lineTo(ix + 3.5, cy + 3.5);
+                                ctx.lineTo(ix + 9, cy - 4);
                             } else {
-                                ctx.moveTo(ix + 1, cy - 4.5);
-                                ctx.lineTo(ix + 10, cy + 4.5);
-                                ctx.moveTo(ix + 10, cy - 4.5);
-                                ctx.lineTo(ix + 1, cy + 4.5);
+                                ctx.moveTo(ix + 1, cy - 3.5);
+                                ctx.lineTo(ix + 8, cy + 3.5);
+                                ctx.moveTo(ix + 8, cy - 3.5);
+                                ctx.lineTo(ix + 1, cy + 3.5);
                             }
                             ctx.stroke();
                             ctx.restore();
-                            text(m.r, ix + 18, y, "left", m.c);
+                            text(m.r, ix + 14, y + 1, "left", m.c);
                         } else {
                             text(m.r, PAD + CW, y, "right");
                         }
                     }
-                    y += lh + (isStamp ? 4 : 0);
+                    y += lh + (isStamp ? 3 : 2);
                 } else {
                     wrap(m.l, sz, m.b, CW).forEach(line => {
                         if (draw) { setF(sz, m.b); text(line, PAD, y, "left"); }
@@ -2368,36 +2382,75 @@ function drawReceiptCanvas(it, logoImg) {
                         setF(sz, m.b || m.b2 || isStamp);
                         text(m.r, PAD + CW, y, "right", isStamp ? m.c : "#000");
                     }
-                    y += lh;
+                    y += lh + 2;
                 }
             } else if (m.k === "div") {
-                y += 4;
+                y += 3;
                 if (draw) {
                     ctx.save();
-                    ctx.strokeStyle = "#000";
-                    if (m.style === "dash") { ctx.setLineDash([4, 3]); ctx.lineWidth = 1; }
-                    else { ctx.lineWidth = 2; }
-                    ctx.beginPath();
-                    ctx.moveTo(PAD, y + 0.5);
-                    ctx.lineTo(PAD + CW, y + 0.5);
-                    ctx.stroke();
+                    ctx.strokeStyle = "#000000";
+                    if (m.style === "dash") {
+                        ctx.setLineDash([3, 2.5]);
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(PAD, y + 0.5);
+                        ctx.lineTo(PAD + CW, y + 0.5);
+                        ctx.stroke();
+                    } else if (m.style === "double") {
+                        ctx.setLineDash([]);
+                        ctx.lineWidth = 1.2;
+                        ctx.beginPath();
+                        ctx.moveTo(PAD, y);
+                        ctx.lineTo(PAD + CW, y);
+                        ctx.moveTo(PAD, y + 2.5);
+                        ctx.lineTo(PAD + CW, y + 2.5);
+                        ctx.stroke();
+                    }
                     ctx.restore();
                 }
-                y += 7;
+                y += (m.style === "double" ? 6 : 5);
             }
         });
         return y;
     }
 
     const mctx = document.createElement("canvas").getContext("2d");
-    const totalH = Math.ceil(run(mctx, false) + 18);
+    const contentH = run(mctx, false);
+    const paperH = Math.ceil(contentH + toothH + 2);
+
     const canvas = document.createElement("canvas");
     canvas.width = W * S;
-    canvas.height = totalH * S;
+    canvas.height = paperH * S;
     const ctx = canvas.getContext("2d");
     ctx.scale(S, S);
+
+    // Bentuk kertas termal putih lengkap dengan potongan gigi gergaji (sawtooth) atas dan bawah sama persis seperti di sistem
+    ctx.save();
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, W, totalH);
+    ctx.beginPath();
+    ctx.moveTo(0, toothH);
+    for (let i = 0; i < teeth; i++) {
+        const x0 = i * tw;
+        ctx.lineTo(x0 + tw / 2, 0);
+        ctx.lineTo((i + 1) * tw, toothH);
+    }
+    ctx.lineTo(W, paperH - toothH);
+    for (let i = 0; i < teeth; i++) {
+        const x0 = W - i * tw;
+        ctx.lineTo(x0 - tw / 2, paperH);
+        ctx.lineTo(x0 - tw, paperH - toothH);
+    }
+    ctx.lineTo(0, toothH);
+    ctx.closePath();
+    ctx.fill();
+
+    // Garis batas luar kertas halus
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    // Gambar seluruh elemen isi struk
     run(ctx, true);
     return canvas;
 }
@@ -2423,6 +2476,9 @@ async function receiptToBlob(it) {
 window.sendReceiptWA = async function() {
     if (!currentActiveReceipt) return;
     const it = currentActiveReceipt;
+    const lunas = it.bayar === "SUDAH";
+    const fullJenis = getJenisLaundryFullName(it.jenis);
+    const pay = getPayInfo(it);
     const btn = document.getElementById("waSendBtn");
     const oldText = btn.textContent;
     btn.disabled = true;
@@ -2441,17 +2497,49 @@ window.sendReceiptWA = async function() {
         const fileName = `Struk_${safeName}_${it.noStruk || String(it.id).slice(-6)}.png`;
         const file = new File([blob], fileName, { type: "image/png" });
 
-        // 1) HP / browser yang mendukung share file: foto struk langsung dibagikan ke WhatsApp
+        // Teks struk lengkap berformat WhatsApp yang sama persis dengan tampilan sistem
+        const waReceiptText = `*${storeInfo.name}*
+_${storeInfo.tagline}_
+${storeInfo.address}
+Telp/WA: ${storeInfo.phone}
+--------------------------------
+*No. Struk* : ${receiptNo(it)}
+*Tanggal*   : ${it.tanggal}
+*Waktu*     : ${it.waktu}
+*Customer*  : *${it.nama}*
+--------------------------------
+*LAYANAN*
+*${fullJenis}*${Number(it.plastik) > 0 ? `\n• Plastik: ${it.plastik} Pcs` : ''}${Number(it.sabun) > 0 ? `\n• Sabun Cuci: ${it.sabun} Sachet` : ''}${Number(it.pewangi) > 0 ? `\n• Pewangi: ${it.pewangi} Sachet` : ''}
+--------------------------------
+*Status*    : ${lunas ? '✓ *LUNAS*' : '✖ *BELUM*'}
+${lunas ? `*Metode*    : *${it.metode}*` : ''}
+================================
+*TOTAL*     : *${formatRupiah(it.harga)}*
+================================
+${lunas ? `*Uang Bayar*: ${formatRupiah(pay.uang)}\n*Kembalian* : ${formatRupiah(pay.kembali)}\n================================\n` : ''}*TERIMA KASIH BANYAK*
+${storeInfo.footer}
+*** ${storeInfo.name} ***`;
+
+        const msg = encodeURIComponent(waReceiptText);
+
+        // 1) HP / browser yang mendukung share file: foto struk langsung dibagikan ke WhatsApp beserta teks struk
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
-                await navigator.share({ files: [file], title: "Struk " + storeInfo.name });
+                await navigator.share({
+                    files: [file],
+                    title: "Struk " + storeInfo.name,
+                    text: waReceiptText
+                });
                 return;
             } catch (err) {
                 if (err && err.name === "AbortError") return;
             }
         }
 
-        // 2) Komputer: salin foto ke clipboard + simpan PNG + buka aplikasi WhatsApp
+        // 2) Komputer / browser tanpa share file:
+        //    Salin foto struk ke clipboard (bisa langsung Ctrl+V di WhatsApp Web / Desktop)
+        //    + download file PNG
+        //    + buka link WhatsApp dengan teks struk lengkap
         let copied = false;
         try {
             if (navigator.clipboard && window.ClipboardItem) {
@@ -2471,7 +2559,7 @@ window.sendReceiptWA = async function() {
 
         let phone = document.getElementById("custWaInput").value.replace(/[^\d]/g, "");
         if (phone.startsWith("0")) phone = "62" + phone.slice(1);
-        const msg = encodeURIComponent("Terima kasih, berikut struk laundry Anda.");
+        else if (phone.startsWith("8")) phone = "62" + phone;
         const appUrl = phone
             ? `whatsapp://send?phone=${phone}&text=${msg}`
             : `whatsapp://send?text=${msg}`;
@@ -2479,7 +2567,6 @@ window.sendReceiptWA = async function() {
             ? `https://api.whatsapp.com/send?phone=${phone}&text=${msg}`
             : `https://api.whatsapp.com/send?text=${msg}`;
 
-        // Buka aplikasi WhatsApp langsung; jika aplikasi tidak ada, buka WhatsApp Web
         let leftPage = false;
         const onLeave = () => { leftPage = true; };
         window.addEventListener("blur", onLeave, { once: true });
@@ -2492,8 +2579,8 @@ window.sendReceiptWA = async function() {
         }, 1800);
 
         showToast(copied
-            ? "Foto struk sudah disalin & disimpan. Di chat WhatsApp tekan Ctrl+V lalu kirim."
-            : "Foto struk sudah disimpan (" + fileName + "). Di chat WhatsApp lampirkan fotonya lalu kirim.", 7000);
+            ? "Foto struk tersalin ke clipboard & diunduh (" + fileName + "). Teks struk terisi di WhatsApp. Tekan kirim (atau Ctrl+V untuk lampirkan foto struk)."
+            : "Foto struk tersimpan (" + fileName + "). Teks struk terisi di WhatsApp. Lampirkan foto struk lalu kirim.", 7000);
     } finally {
         btn.disabled = false;
         btn.textContent = oldText;
