@@ -545,15 +545,15 @@ button:active {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: linear-gradient(135deg, #FEDA5C 0%, #FE9A4A 45%, #29B6D1 100%);
-    color: #28465A;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    color: #FFFFFF;
     font-size: 13px;
     font-weight: 800;
     letter-spacing: .1px;
     cursor: pointer;
     user-select: none;
-    box-shadow: 0 3px 8px rgba(0,0,0,.06);
-    border: 1px solid rgba(254,125,70,.28);
+    box-shadow: 0 3px 8px rgba(37,99,235,.22);
+    border: 1px solid #1D4ED8;
     transition: transform .2s, opacity .2s, box-shadow .2s;
 }
 .btn-upload:hover { transform: translateY(-2px); opacity: .95; box-shadow: 0 6px 14px rgba(0,0,0,.12); }
@@ -1217,20 +1217,20 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
             <!-- Cashier Action Controls -->
             <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:10px;">
                 <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
-                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">CETAK KE PRINTER KASIR (58 MM)</h4>
-                    <p style="font-size:11px; color:#64748b; margin:0 0 10px 0;">Struk di layar tetap terlihat jelas dan tidak akan tertutup atau hilang saat dicetak.</p>
-                    <button type="button" onclick="printReceiptIframe()" style="width:100%; height:44px; background:#2563eb; color:#fff; font-weight:bold; border-radius:8px; border:none; cursor:pointer; font-size:13px; box-shadow:0 4px 10px rgba(37,99,235,0.25);">
-                        Cetak Struk (58 mm)
-                    </button>
-                </div>
-
-                <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
                     <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">KIRIM STRUK KE WHATSAPP (FOTO)</h4>
                     <div style="display:flex; gap:6px;">
                         <input type="text" id="custWaInput" placeholder="No. WA (0812...)" style="flex:1; height:36px; padding:0 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#28465A; background:#fff;">
                         <button type="button" id="waSendBtn" onclick="sendReceiptWA()" style="height:36px; padding:0 12px; background:#10b981; color:#fff; border:none; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;">Kirim WA</button>
                     </div>
                     <p style="font-size:10.5px; color:#64748b; margin:8px 0 0 0; line-height:1.4;">HP: foto struk langsung dibagikan, pilih WhatsApp lalu kontak tujuan. Komputer: aplikasi WhatsApp terbuka ke chat nomor tujuan dan foto struk sudah tersalin, tinggal tempel (Ctrl+V) lalu kirim.</p>
+                </div>
+
+                <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
+                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">CETAK KE PRINTER KASIR (58 MM)</h4>
+                    <p style="font-size:11px; color:#64748b; margin:0 0 10px 0;">Struk di layar tetap terlihat jelas dan tidak akan tertutup atau hilang saat dicetak.</p>
+                    <button type="button" id="receiptPrintButton" onclick="printReceiptIframe()" style="width:100%; height:44px; background:#2563eb; color:#fff; font-weight:bold; border-radius:8px; border:none; cursor:pointer; font-size:13px; box-shadow:0 4px 10px rgba(37,99,235,0.25);">
+                        Cetak Struk (58 mm)
+                    </button>
                 </div>
 
                 <div style="display:flex; gap:8px;">
@@ -1788,7 +1788,7 @@ function renderTable() {
                 <td>${it.bayar === "SUDAH" ? '<span class="status-paid">✓ Sudah</span>' : '<span class="status-unpaid">✖ Belum</span>'}</td>
                 <td>${it.bayar === "SUDAH" ? escapeHTML(it.metode) : '-'}</td>
                 <td class="action-column">
-                    <button type="button" class="action-btn btn-struk" onclick="openReceiptModal(${it.id})">Struk</button>
+                    ${it.bayar === "SUDAH" ? `<button type="button" class="action-btn btn-struk" onclick="openReceiptModal(${it.id})">Struk</button>` : ''}
                 </td>
             `;
             tb.appendChild(tr);
@@ -2057,6 +2057,14 @@ window.openReceiptModal = function(id) {
     `;
 
     document.getElementById("custWaInput").value = "";
+    const printButton = document.getElementById("receiptPrintButton");
+    if (printButton) {
+        printButton.disabled = !lunas;
+        printButton.textContent = lunas ? "Cetak Struk (58 mm)" : "Tidak Bisa Cetak — Belum Bayar";
+        printButton.style.background = lunas ? "#2563eb" : "#9CA3AF";
+        printButton.style.cursor = lunas ? "pointer" : "not-allowed";
+        printButton.style.opacity = lunas ? "1" : "0.85";
+    }
     document.getElementById("storeSettingsDrawer").style.display = "none";
     document.getElementById("receiptModal").style.display = "flex";
 };
@@ -2067,6 +2075,11 @@ window.closeReceiptModal = function() {
 
 window.printReceiptIframe = function() {
     if (!currentActiveReceipt) return;
+    // Pemeriksaan wajib di sisi fungsi: struk hanya dapat dicetak jika sudah lunas.
+    if (currentActiveReceipt.bayar !== "SUDAH") {
+        alert("Struk tidak dapat dicetak karena pembayaran belum lunas. Silakan selesaikan pembayaran terlebih dahulu.");
+        return;
+    }
     const content = document.getElementById("thermalReceiptContent").innerHTML;
 
     let iframe = document.getElementById("thermalPrintIframe");
