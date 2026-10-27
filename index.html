@@ -293,7 +293,15 @@ button:active {
     transform: translateY(0);
     opacity: .88;
 }
-.btn-save { background: #1E88E5; color: white; }
+.btn-save { background: #1E88E5; color: white; width: 70%; justify-self: center; grid-column: 1 / -1; }
+@media (max-width: 600px) { .btn-save { width: 100%; } }
+/* Riwayat tanggal sebelumnya hanya tampil saat tabel diperbesar */
+#previousHistorySection { display: none; margin-top: 24px; }
+#historyCard:fullscreen #previousHistorySection,
+#historyCard:-webkit-full-screen #previousHistorySection { display: block; }
+#previousHistorySection h3 { margin: 0 0 12px; color: #28465A; }
+body.dark-theme #previousHistorySection h3 { color: #EAF2F6; }
+
 .btn-print { background: #304B5A; color: white; }
 .btn-excel { background: #237A4B; color: white; }
 .action-btn {
@@ -906,6 +914,55 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
     .bottom-actions button { width: 100%; min-height: 46px; }
     .bottom-actions .btn-upload { width: 100%; min-height: 46px; }
     .adm-form-grid { grid-template-columns: 1fr; }
+
+    /* Penyempurnaan tampilan HP: ruang lebih lega, tombol mudah disentuh */
+    body { font-size: 14px; line-height: 1.45; }
+    .container { width: 100%; max-width: 100%; min-width: 0; }
+    .header-brand { align-items: flex-start; gap: 10px; padding-right: 0; }
+    .header-logo { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 12px !important; }
+    .header h1 { font-size: clamp(17px, 5vw, 21px); overflow-wrap: anywhere; }
+    .header p { font-size: 11px; line-height: 1.4; }
+    .theme-switcher { position: relative; top: auto; right: auto; display: inline-flex; margin-top: 10px; max-width: 100%; }
+    .realtime { display: block; width: 100%; padding: 9px 8px; line-height: 1.5; overflow-wrap: anywhere; }
+    .main-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 8px; }
+    .nav-btn { width: 100%; min-width: 0; min-height: 44px; height: auto; padding: 9px 6px; line-height: 1.25; white-space: normal; overflow-wrap: anywhere; }
+    .admin-badge { min-height: 38px; height: auto; padding: 8px 10px; text-align: center; white-space: normal; }
+    .card { min-width: 0; padding: 13px 11px; border-radius: 13px; }
+    .card h2 { font-size: 17px; margin-bottom: 12px; overflow-wrap: anywhere; }
+    .form-grid { grid-template-columns: minmax(0, 1fr); gap: 11px; }
+    .form-group { min-width: 0; }
+    .form-group label { font-size: 12px; line-height: 1.35; }
+    .form-group input, .form-group select, .date-filter, .search-box, .modal-input { min-width: 0; font-size: 16px; }
+    .button-area { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 14px; }
+    .button-area button, .bottom-actions button, .modal-actions button { min-height: 46px; height: auto; padding: 10px 12px; line-height: 1.3; white-space: normal; }
+    .dashboard { grid-template-columns: minmax(0, 1fr); }
+    .dashboard-card { min-width: 0; padding: 14px; }
+    .history-header { align-items: stretch; gap: 10px; }
+    .history-title-area { min-width: 0; flex-wrap: wrap; }
+    .history-title-area h2 { overflow-wrap: anywhere; }
+    .filter-area { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; }
+    .date-filter, .search-box { width: 100%; height: 44px; }
+    .table-wrapper { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+    .history-table { min-width: 1100px; }
+    .history-table th { padding: 10px 7px; font-size: 11px; }
+    .history-table td { padding: 10px 7px; font-size: 12px; }
+    .bottom-actions { display: flex; flex-direction: column; gap: 8px; }
+    .bottom-actions button, .bottom-actions .btn-upload { width: 100%; min-width: 0; }
+    .upload-excel-floating { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); max-width: calc(100vw - 24px); min-height: 46px; padding: 0 13px; }
+    .modal-overlay { align-items: flex-end; padding: 8px; }
+    .modal-card { width: 100%; max-width: 100%; max-height: 90dvh; border-radius: 16px 16px 12px 12px; }
+    .modal-head { padding: 12px; gap: 8px; }
+    .modal-body { padding: 13px 12px; }
+    .modal-actions { flex-wrap: wrap; }
+    .modal-actions button { min-width: 0; }
+}
+
+@media (max-width: 380px) {
+    .header { padding: 12px 10px; }
+    .header-logo { width: 42px; height: 42px; flex-basis: 42px; }
+    .main-nav { grid-template-columns: minmax(0, 1fr); }
+    .card { padding: 11px 9px; }
+    .upload-excel-floating { left: 10px; right: 10px; width: auto; }
 }
 
 /* Print Landscape A4 */
@@ -999,7 +1056,6 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
             </div>
             <div class="button-area">
                 <button type="submit" class="btn-save">SIMPAN PEMBUKUAN</button>
-                <button type="button" class="btn-print" id="printBtn">CETAK PEMBUKUAN</button>
             </div>
         </form>
     </div>
@@ -1026,7 +1082,7 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
             </div>
             <div>
                 <div class="dashboard-card purple">
-                <h3>Total Pendapatan</h3>
+                <h3>Pendapatan Hari Ini</h3>
                 <strong id="totalPendapatan">Rp 0</strong>
             </div>
         </div>
@@ -1069,7 +1125,19 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
-        <div class="print-total" id="printTotal">Total Pendapatan: Rp 0</div>
+        <section id="previousHistorySection" aria-label="Riwayat pembukuan hari sebelumnya">
+            <h3>Riwayat Pembukuan Hari Sebelumnya</h3>
+            <div class="table-wrapper">
+                <table class="history-table">
+                    <thead><tr>
+                        <th>NO</th><th>TANGGAL</th><th>JAM</th><th>NAMA</th><th>JENIS LAUNDRY</th><th>PLASTIK</th><th>SABUN</th><th>PEWANGI</th><th>HARGA</th><th>UANG BAYAR</th><th>KEMBALIAN</th><th>STATUS BAYAR</th><th>METODE PEMBAYARAN</th><th class="action-column">STRUK</th>
+                    </tr></thead>
+                    <tbody id="previousHistoryBody"></tbody>
+                </table>
+            </div>
+            <div class="print-total" id="previousPrintTotal">Total Pendapatan Riwayat: Rp 0</div>
+        </section>
+        <div class="print-total" id="printTotal">Pendapatan Hari Ini: Rp 0</div>
         <div class="bottom-actions">
             <button class="btn-excel" id="excelBtn" type="button">EXPORT EXCEL</button>
             <label for="excelUpload" class="btn-upload" title="Upload Excel ke History">UPLOAD EXCEL</label>
@@ -1732,9 +1800,14 @@ form.addEventListener("submit", function(e) {
     bayarInput.dispatchEvent(new Event("change"));
     renderTable();
 
-    // Open receipt modal directly on screen
-    openReceiptModal(item.id);
-    showStatus("ok", "Pembukuan berhasil disimpan");
+    // Hanya tampilkan modal struk untuk transaksi yang sudah lunas.
+    // Jika belum bayar, langsung kembali ke tabel pembukuan.
+    if (item.bayar === "SUDAH") {
+        openReceiptModal(item.id);
+    }
+    showStatus("ok", item.bayar === "SUDAH"
+        ? "Pembukuan berhasil disimpan"
+        : "Pembukuan berhasil disimpan — status belum bayar");
 });
 
 // =========================================================
@@ -1742,35 +1815,28 @@ form.addEventListener("submit", function(e) {
 // =========================================================
 function renderTable() {
     const tb = document.getElementById("historyBody");
+    const oldTb = document.getElementById("previousHistoryBody");
     const s = document.getElementById("search").value.toLowerCase().trim();
     const d = document.getElementById("dateFilter").value;
+    const today = formatTanggal(new Date());
 
-    const filtered = data.filter(it => {
-        if (d) {
-            const p = it.tanggal.split("/");
-            if (p.length === 3 && `${p[2]}-${p[1]}-${p[0]}` !== d) return false;
-        }
-        if (!s) return true;
-        return (
-            it.nama.toLowerCase().includes(s) ||
-            it.jenis.toLowerCase().includes(s) ||
+    function matchesSearch(it) {
+        return !s || String(it.nama || "").toLowerCase().includes(s) ||
+            String(it.jenis || "").toLowerCase().includes(s) ||
             getJenisLaundryFullName(it.jenis).toLowerCase().includes(s) ||
-            it.tanggal.includes(s)
-        );
-    });
-
-    tb.innerHTML = "";
-    let totalRp = 0, totalCash = 0, totalQris = 0, cCash = 0, cQris = 0;
-
-    if (filtered.length === 0) {
-        tb.innerHTML = `<tr><td colspan="14" class="empty">Belum ada data pembukuan.</td></tr>`;
-    } else {
-        filtered.forEach((it, idx) => {
-            if (it.bayar === "SUDAH") {
-                totalRp += it.harga;
-                if (it.metode === "CASH") { totalCash += it.harga; cCash++; }
-                else if (it.metode === "QRIS") { totalQris += it.harga; cQris++; }
-            }
+            String(it.tanggal || "").includes(s);
+    }
+    function dateToIso(value) {
+        const parts = String(value || "").split("/");
+        return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : "";
+    }
+    function buildRows(target, rows, emptyText) {
+        target.innerHTML = "";
+        if (!rows.length) {
+            target.innerHTML = `<tr><td colspan="14" class="empty">${emptyText}</td></tr>`;
+            return;
+        }
+        rows.forEach((it, idx) => {
             const pay = getPayInfo(it);
             const tr = document.createElement("tr");
             tr.innerHTML = `
@@ -1787,19 +1853,42 @@ function renderTable() {
                 <td>${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(pay.kembali)+'</span>' : '-'}</td>
                 <td>${it.bayar === "SUDAH" ? '<span class="status-paid">✓ Sudah</span>' : '<span class="status-unpaid">✖ Belum</span>'}</td>
                 <td>${it.bayar === "SUDAH" ? escapeHTML(it.metode) : '-'}</td>
-                <td class="action-column">
-                    ${it.bayar === "SUDAH" ? `<button type="button" class="action-btn btn-struk" onclick="openReceiptModal(${it.id})">Struk</button>` : ''}
-                </td>
+                <td class="action-column">${it.bayar === "SUDAH" ? `<button type="button" class="action-btn btn-struk" onclick="openReceiptModal(${it.id})">Struk</button>` : ''}</td>
             `;
-            tb.appendChild(tr);
+            target.appendChild(tr);
         });
     }
 
-    document.getElementById("totalTransaksi").textContent = filtered.length;
+    // Tabel utama di dashboard selalu menampilkan transaksi bertanggal hari ini.
+    const todayRows = data.filter(it => it.tanggal === today && matchesSearch(it));
+    // Riwayat tanggal sebelumnya ditampilkan di bagian terpisah saat tabel diperbesar.
+    let previousRows = data.filter(it => it.tanggal !== today && matchesSearch(it));
+    if (d) previousRows = previousRows.filter(it => dateToIso(it.tanggal) === d);
+
+    buildRows(tb, todayRows, "Belum ada pembukuan untuk hari ini.");
+    buildRows(oldTb, previousRows, "Belum ada riwayat pembukuan untuk tanggal sebelumnya.");
+
+    let totalRp = 0, totalCash = 0, totalQris = 0, cCash = 0, cQris = 0;
+    todayRows.forEach(it => {
+        if (it.bayar === "SUDAH") {
+            const harga = Number(it.harga) || 0;
+            totalRp += harga;
+            if (it.metode === "CASH") { totalCash += harga; cCash++; }
+            else if (it.metode === "QRIS") { totalQris += harga; cQris++; }
+        }
+    });
+    const previousIncome = previousRows.reduce((sum, it) => sum + (it.bayar === "SUDAH" ? (Number(it.harga) || 0) : 0), 0);
+    document.getElementById("totalTransaksi").textContent = todayRows.length;
     document.getElementById("totalMetode").textContent = `${cCash} / ${cQris}`;
     document.getElementById("totalCashQris").textContent = `${formatRupiah(totalCash)} / ${formatRupiah(totalQris)}`;
+
+    // Simpan otomatis pendapatan hari ini, tanpa menghapus data tanggal-tanggal sebelumnya.
+    try {
+        localStorage.setItem("pudel_two_laundry_daily_income", JSON.stringify({ tanggal: today, pendapatan: totalRp }));
+    } catch (e) {}
     document.getElementById("totalPendapatan").textContent = formatRupiah(totalRp);
-    document.getElementById("printTotal").textContent = "Total Pendapatan: " + formatRupiah(totalRp);
+    document.getElementById("printTotal").textContent = "Pendapatan Hari Ini: " + formatRupiah(totalRp);
+    document.getElementById("previousPrintTotal").textContent = "Total Pendapatan Riwayat: " + formatRupiah(previousIncome);
 }
 
 // =========================================================
@@ -2034,9 +2123,9 @@ window.openReceiptModal = function(id) {
         <div class="thermal-receipt-divider"></div>
         <div class="thermal-receipt-row" style="font-weight:bold;"><span>LAYANAN</span></div>
         <div style="font-size:10.5px; font-weight:bold; margin-bottom:2px;">${fullJenis}</div>
-        <div class="thermal-receipt-row"><span>• Plastik</span><span>${it.plastik > 0 ? it.plastik + ' Pcs' : '-'}</span></div>
-        <div class="thermal-receipt-row"><span>• Sabun Cuci</span><span>${it.sabun > 0 ? it.sabun + ' Sachet' : '-'}</span></div>
-        <div class="thermal-receipt-row"><span>• Pewangi</span><span>${it.pewangi > 0 ? it.pewangi + ' Sachet' : '-'}</span></div>
+        ${Number(it.plastik) > 0 ? `<div class="thermal-receipt-row"><span>• Plastik</span><span>${it.plastik} Pcs</span></div>` : ''}
+        ${Number(it.sabun) > 0 ? `<div class="thermal-receipt-row"><span>• Sabun Cuci</span><span>${it.sabun} Sachet</span></div>` : ''}
+        ${Number(it.pewangi) > 0 ? `<div class="thermal-receipt-row"><span>• Pewangi</span><span>${it.pewangi} Sachet</span></div>` : ''}
         <div class="thermal-receipt-divider"></div>
         <div class="thermal-receipt-row">
             <span>Status</span>
@@ -2161,9 +2250,9 @@ function drawReceiptCanvas(it, logoImg) {
     items.push({ k: "div", style: "dash" });
     items.push({ k: "t", s: "LAYANAN", sz: 13, b: true, a: "l" });
     items.push({ k: "t", s: jenisFull, sz: 13, b: true, a: "l" });
-    items.push({ k: "row", l: "• Plastik", r: it.plastik > 0 ? it.plastik + " Pcs" : "-" });
-    items.push({ k: "row", l: "• Sabun Cuci", r: it.sabun > 0 ? it.sabun + " Sachet" : "-" });
-    items.push({ k: "row", l: "• Pewangi", r: it.pewangi > 0 ? it.pewangi + " Sachet" : "-" });
+    if (Number(it.plastik) > 0) items.push({ k: "row", l: "• Plastik", r: it.plastik + " Pcs" });
+    if (Number(it.sabun) > 0) items.push({ k: "row", l: "• Sabun Cuci", r: it.sabun + " Sachet" });
+    if (Number(it.pewangi) > 0) items.push({ k: "row", l: "• Pewangi", r: it.pewangi + " Sachet" });
     items.push({ k: "div", style: "dash" });
     items.push({ k: "stamp", l: "Status", r: lunas ? "LUNAS" : "BELUM", c: lunas ? "#059669" : "#dc2626", ok: lunas });
     if (lunas) items.push({ k: "row", l: "Metode", r: it.metode || "-", b2: true });
@@ -2427,10 +2516,10 @@ No. Struk : ${receiptNo(it)}
 Tanggal   : ${it.tanggal} ${it.waktu}
 Pelanggan : ${it.nama}
 --------------------------------
-Layanan   : ${fullJenis}
-• Plastik    : ${it.plastik > 0 ? it.plastik + ' Pcs' : '-'}
-• Sabun Cuci : ${it.sabun > 0 ? it.sabun + ' Sachet' : '-'}
-• Pewangi    : ${it.pewangi > 0 ? it.pewangi + ' Sachet' : '-'}
+Layanan   : ${fullJenis}${Number(it.plastik) > 0 ? `
+• Plastik    : ${it.plastik} Pcs` : ''}${Number(it.sabun) > 0 ? `
+• Sabun Cuci : ${it.sabun} Sachet` : ''}${Number(it.pewangi) > 0 ? `
+• Pewangi    : ${it.pewangi} Sachet` : ''}
 --------------------------------
 Status    : ${it.bayar}
 Metode    : ${it.metode||'-'}
@@ -2605,7 +2694,7 @@ document.getElementById("excelUpload").addEventListener("change", function(e) {
 
 document.getElementById("search").addEventListener("input", renderTable);
 document.getElementById("dateFilter").addEventListener("change", renderTable);
-document.getElementById("printBtn").addEventListener("click", () => window.print());
+// Tombol CETAK PEMBUKUAN dihapus sesuai permintaan.
 
 // Layar penuh tabel pembukuan
 document.getElementById("historyFullscreenBtn").addEventListener("click", () => {
@@ -2615,6 +2704,9 @@ document.getElementById("historyFullscreenBtn").addEventListener("click", () => 
     } else if (el.requestFullscreen) {
         el.requestFullscreen().catch(() => {});
     }
+});
+document.addEventListener("fullscreenchange", () => {
+    renderTable();
 });
 
 const themeToggle = document.getElementById("themeToggle");
