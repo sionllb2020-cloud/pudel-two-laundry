@@ -1292,7 +1292,7 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
                 <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
                     <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">KIRIM STRUK KE WHATSAPP</h4>
                     <div style="display:flex; gap:6px;">
-                        <input type="text" id="custWaInput" placeholder="Ketik No Whatsapp / Klik" style="flex:1; height:36px; padding:0 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#28465A; background:#fff;">
+                        <input type="text" id="custWaInput" placeholder="Ketik No Whatsapp (contoh: 0812...)" style="flex:1; height:36px; padding:0 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#28465A; background:#fff;">
                         <button type="button" id="waSendBtn" onclick="sendReceiptWA()" style="height:36px; padding:0 12px; background:#10b981; color:#fff; border:none; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;">Kirim WHATSAPP</button>
                     </div>
                 </div>
@@ -1617,7 +1617,18 @@ function lockAdmin() {
     pendingAfterAuth = null;
     closeAdminPanel();
     document.getElementById("accessModal").style.display = "none";
-    applyAdminUI();
+    
+const waInputEl = document.getElementById("custWaInput");
+if (waInputEl) {
+    waInputEl.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            sendReceiptWA();
+        }
+    });
+}
+
+applyAdminUI();
     renderTable();
 }
 
@@ -2482,20 +2493,23 @@ window.sendReceiptWA = async function() {
     const btn = document.getElementById("waSendBtn");
     const oldText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = "Membuat...";
+    btn.textContent = "Memproses...";
 
     try {
+        let rawPhone = (document.getElementById("custWaInput").value || "").trim();
+        let phone = rawPhone.replace(/[^\d]/g, "");
+        if (phone.startsWith("0")) phone = "62" + phone.slice(1);
+        else if (phone.startsWith("8")) phone = "62" + phone;
+
         let blob;
         try {
             blob = await receiptToBlob(it);
         } catch (err) {
-            alert("Gagal membuat foto struk.");
-            return;
+            blob = null;
         }
 
         const safeName = String(it.nama || "customer").replace(/[^\w]+/g, "_");
         const fileName = `Struk_${safeName}_${it.noStruk || String(it.id).slice(-6)}.png`;
-        const file = new File([blob], fileName, { type: "image/png" });
 
         // Teks struk lengkap berformat WhatsApp yang sama persis dengan tampilan sistem
         const waReceiptText = `*${storeInfo.name}*
@@ -2522,65 +2536,99 @@ ${storeInfo.footer}
 
         const msg = encodeURIComponent(waReceiptText);
 
-        // 1) HP / browser yang mendukung share file: foto struk langsung dibagikan ke WhatsApp beserta teks struk
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({
-                    files: [file],
-                    title: "Struk " + storeInfo.name,
-                    text: waReceiptText
-                });
-                return;
-            } catch (err) {
-                if (err && err.name === "AbortError") return;
+        // Jika nomor diketik: langsung buka chat WhatsApp ke nomor tujuan tersebut
+        if (phone) {
+            // Salin foto ke clipboard & download agar pelanggan/kasir bisa lampirkan foto struk
+            if (blob) {
+                try {
+                    if (navigator.clipboard && window.ClipboardItem) {
+                        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                    }
+                } catch (e) {}
+
+                try {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 2000);
+                } catch (e) {}
             }
+
+            const appUrl = `whatsapp://send?phone=${phone}&text=${msg}`;
+            const webUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${msg}`;
+
+            let leftPage = false;
+            const onLeave = () => { leftPage = true; };
+            window.addEventListener("blur", onLeave, { once: true });
+            document.addEventListener("visibilitychange", onLeave, { once: true });
+
+            window.location.href = appUrl;
+            setTimeout(() => {
+                window.removeEventListener("blur", onLeave);
+                document.removeEventListener("visibilitychange", onLeave);
+                if (!leftPage) window.open(webUrl, "_blank");
+            }, 1200);
+
+            showToast(`Membuka WhatsApp ke nomor +${phone}. Rincian struk otomatis terisi. Foto struk juga tersalin & terunduh.`, 6000);
+            return;
         }
 
-        // 2) Komputer / browser tanpa share file:
-        //    Salin foto struk ke clipboard (bisa langsung Ctrl+V di WhatsApp Web / Desktop)
-        //    + download file PNG
-        //    + buka link WhatsApp dengan teks struk lengkap
-        let copied = false;
-        try {
-            if (navigator.clipboard && window.ClipboardItem) {
-                await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-                copied = true;
+        // Jika nomor WhatsApp kosong / tidak diketik:
+        // 1) Gunakan share file jika didukung browser
+        if (blob) {
+            const file = new File([blob], fileName, { type: "image/png" });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: "Struk " + storeInfo.name,
+                        text: waReceiptText
+                    });
+                    return;
+                } catch (err) {
+                    if (err && err.name === "AbortError") return;
+                }
             }
-        } catch (err) { copied = false; }
 
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
+            // 2) Simpan & buka WhatsApp tanpa nomor (pilih kontak)
+            try {
+                if (navigator.clipboard && window.ClipboardItem) {
+                    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                }
+            } catch (e) {}
 
-        let phone = document.getElementById("custWaInput").value.replace(/[^\d]/g, "");
-        if (phone.startsWith("0")) phone = "62" + phone.slice(1);
-        else if (phone.startsWith("8")) phone = "62" + phone;
-        const appUrl = phone
-            ? `whatsapp://send?phone=${phone}&text=${msg}`
-            : `whatsapp://send?text=${msg}`;
-        const webUrl = phone
-            ? `https://api.whatsapp.com/send?phone=${phone}&text=${msg}`
-            : `https://api.whatsapp.com/send?text=${msg}`;
+            try {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 2000);
+            } catch (e) {}
+        }
+
+        const appUrl = `whatsapp://send?text=${msg}`;
+        const webUrl = `https://api.whatsapp.com/send?text=${msg}`;
 
         let leftPage = false;
         const onLeave = () => { leftPage = true; };
         window.addEventListener("blur", onLeave, { once: true });
         document.addEventListener("visibilitychange", onLeave, { once: true });
+
         window.location.href = appUrl;
         setTimeout(() => {
             window.removeEventListener("blur", onLeave);
             document.removeEventListener("visibilitychange", onLeave);
             if (!leftPage) window.open(webUrl, "_blank");
-        }, 1800);
+        }, 1200);
 
-        showToast(copied
-            ? "Foto struk tersalin ke clipboard & diunduh (" + fileName + "). Teks struk terisi di WhatsApp. Tekan kirim (atau Ctrl+V untuk lampirkan foto struk)."
-            : "Foto struk tersimpan (" + fileName + "). Teks struk terisi di WhatsApp. Lampirkan foto struk lalu kirim.", 7000);
+        showToast("Membuka WhatsApp. Rincian struk otomatis terisi. Foto struk juga tersalin & terunduh.", 6000);
     } finally {
         btn.disabled = false;
         btn.textContent = oldText;
