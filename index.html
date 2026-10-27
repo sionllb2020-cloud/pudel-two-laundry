@@ -1348,7 +1348,7 @@ let storeInfo = {
     tagline: "- COIN LAUNDRY -",
     address: DEFAULT_ADDRESS,
     phone: "0812-3456-7890",
-    footer: "Simpan struk ini sebagai bukti pembayaran"
+    footer: "Simpan struk ini sebagai bukti pembayaran, dan jika ada komplen."
 };
 try {
     const s = localStorage.getItem(STORAGE_STORE_INFO);
@@ -2555,7 +2555,7 @@ window.saveStoreSettings = function() {
         tagline: document.getElementById("cfgStoreTagline").value.trim() || "- COIN LAUNDRY -",
         address: document.getElementById("cfgStoreAddress").value.trim() || DEFAULT_ADDRESS,
         phone: document.getElementById("cfgStorePhone").value.trim() || "0812-3456-7890",
-        footer: document.getElementById("cfgStoreFooter").value.trim() || "Simpan struk ini sebagai bukti pembayaran"
+        footer: document.getElementById("cfgStoreFooter").value.trim() || "Simpan struk ini sebagai bukti pembayaran, dan jika ada komplen."
     };
     localStorage.setItem(STORAGE_STORE_INFO, JSON.stringify(storeInfo));
     document.getElementById("storeSettingsDrawer").style.display = "none";
