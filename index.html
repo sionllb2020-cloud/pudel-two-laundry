@@ -2132,6 +2132,7 @@ window.openReceiptModal = function(id) {
         ${lunas?`<div class="thermal-receipt-row"><span>Metode</span><span style="font-weight:bold;">${escapeHTML(it.metode)}</span></div>`:''}
         <div class="thermal-receipt-divider-double"></div>
         <div class="thermal-receipt-row thermal-receipt-total"><span>TOTAL</span><span>${formatRupiah(it.harga)}</span></div>
+        <div class="thermal-receipt-divider-double"></div>
         ${lunas?`
         <div class="thermal-receipt-row"><span>Uang Bayar</span><span style="font-weight:bold;">${formatRupiah(pay.uang)}</span></div>
         <div class="thermal-receipt-row"><span>Kembalian</span><span style="font-weight:bold;">${formatRupiah(pay.kembali)}</span></div>`:''}
