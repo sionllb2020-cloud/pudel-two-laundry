@@ -1069,7 +1069,7 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
                 <strong id="totalTransaksi">0</strong>
             </div>
             <div class="dashboard-card teal">
-                <h3>Coin Hari Ini</h3>
+                <h3>Koin Hari Ini</h3>
                 <strong id="totalCoinToday">0 Coin</strong>
             </div>    
             <div class="dashboard-card orange">
@@ -1263,8 +1263,8 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
     <div class="modal-card">
         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#0f172a; color:#fff;">
             <div>
-                <h3 style="font-size:14px; font-weight:bold; margin:0;">Struk Kasir Thermal (58 mm)</h3>
-                <p style="font-size:11px; color:#94a3b8; margin:2px 0 0 0;">Tampilan struk nyata seperti aplikasi kasir, jernih & siap cetak</p>
+                <h3 style="font-size:14px; font-weight:bold; margin:0;">Struk</h3>
+                <p style="font-size:11px; color:#94a3b8; margin:2px 0 0 0;">Bisa kirim by Whatsapp / Cetak ke Printer.</p>
             </div>
             <button type="button" onclick="closeReceiptModal()" style="width:32px; height:32px; border-radius:50%; background:#334155; color:#fff; border:none; cursor:pointer; font-size:14px;">X</button>
         </div>
@@ -1285,19 +1285,17 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
             <!-- Cashier Action Controls -->
             <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:10px;">
                 <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
-                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">KIRIM STRUK KE WHATSAPP (FOTO)</h4>
+                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">KIRIM STRUK KE WHATSAPP</h4>
                     <div style="display:flex; gap:6px;">
-                        <input type="text" id="custWaInput" placeholder="No. WA (0812...)" style="flex:1; height:36px; padding:0 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#28465A; background:#fff;">
-                        <button type="button" id="waSendBtn" onclick="sendReceiptWA()" style="height:36px; padding:0 12px; background:#10b981; color:#fff; border:none; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;">Kirim WA</button>
+                        <input type="text" id="custWaInput" placeholder="Ketik No Whatsapp / Klik" style="flex:1; height:36px; padding:0 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#28465A; background:#fff;">
+                        <button type="button" id="waSendBtn" onclick="sendReceiptWA()" style="height:36px; padding:0 12px; background:#10b981; color:#fff; border:none; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;">Kirim WHATSAPP</button>
                     </div>
-                    <p style="font-size:10.5px; color:#64748b; margin:8px 0 0 0; line-height:1.4;">HP: foto struk langsung dibagikan, pilih WhatsApp lalu kontak tujuan. Komputer: aplikasi WhatsApp terbuka ke chat nomor tujuan dan foto struk sudah tersalin, tinggal tempel (Ctrl+V) lalu kirim.</p>
                 </div>
 
                 <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
-                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">CETAK KE PRINTER KASIR (58 MM)</h4>
-                    <p style="font-size:11px; color:#64748b; margin:0 0 10px 0;">Struk di layar tetap terlihat jelas dan tidak akan tertutup atau hilang saat dicetak.</p>
+                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">CETAK KE PRINTER</h4>
                     <button type="button" id="receiptPrintButton" onclick="printReceiptIframe()" style="width:100%; height:44px; background:#2563eb; color:#fff; font-weight:bold; border-radius:8px; border:none; cursor:pointer; font-size:13px; box-shadow:0 4px 10px rgba(37,99,235,0.25);">
-                        Cetak Struk (58 mm)
+                        Cetak Struk
                     </button>
                 </div>
 
@@ -2139,7 +2137,7 @@ window.openReceiptModal = function(id) {
         <div class="thermal-receipt-row"><span>Kembalian</span><span style="font-weight:bold;">${formatRupiah(pay.kembali)}</span></div>`:''}
         <div class="thermal-receipt-divider"></div>
         <div class="thermal-receipt-center" style="font-size:9.5px; margin-top:4px;">
-            <p style="font-weight:bold; margin:0;">TERIMA KASIH</p>
+            <p style="font-weight:bold; margin:0;">TERIMA KASIH BANYAK</p>
             <p style="margin:2px 0 0 0;">${escapeHTML(storeInfo.footer)}</p>
             <p style="font-weight:bold; margin:3px 0 0 0;">*** ${escapeHTML(storeInfo.name)} ***</p>
         </div>
@@ -2149,7 +2147,7 @@ window.openReceiptModal = function(id) {
     const printButton = document.getElementById("receiptPrintButton");
     if (printButton) {
         printButton.disabled = !lunas;
-        printButton.textContent = lunas ? "Cetak Struk (58 mm)" : "Tidak Bisa Cetak — Belum Bayar";
+        printButton.textContent = lunas ? "Cetak Struk" : "Tidak Bisa Cetak — Belum Bayar";
         printButton.style.background = lunas ? "#2563eb" : "#9CA3AF";
         printButton.style.cursor = lunas ? "pointer" : "not-allowed";
         printButton.style.opacity = lunas ? "1" : "0.85";
@@ -2264,7 +2262,7 @@ function drawReceiptCanvas(it, logoImg) {
     }
     items.push({ k: "div", style: "dash" });
     items.push({ k: "gap", h: 4 });
-    items.push({ k: "t", s: "TERIMA KASIH", sz: 13, b: true, a: "c" });
+    items.push({ k: "t", s: "TERIMA KASIH BANYAK", sz: 13, b: true, a: "c" });
     items.push({ k: "t", s: storeInfo.footer, sz: 11, a: "c" });
     items.push({ k: "t", s: "*** " + storeInfo.name + " ***", sz: 12, b: true, a: "c" });
 
