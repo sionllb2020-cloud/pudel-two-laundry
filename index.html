@@ -2,7 +2,10 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1E88E5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>PUDEL TWO LAUNDRY COIN</title>
 <style>
 * {
@@ -972,6 +975,40 @@ body.dark-theme #previousHistorySection .dashboard-card strong { color: #fff !im
     .modal-actions button { min-width: 0; }
 }
 
+/* ===== Mode HP: tabel jadi kartu, dashboard 2 kolom ===== */
+button, label, select, input { touch-action: manipulation; }
+body.fs-lock { overflow: hidden; }
+/* Layar penuh cadangan (iPhone/HP yang tidak mendukung Fullscreen API) */
+#historyCard.fs-fallback { position: fixed; inset: 0; z-index: 9000; overflow: auto; margin: 0; border-radius: 0; padding: 14px; background: #fff; max-width: none; width: auto; -webkit-overflow-scrolling: touch; }
+body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; }
+#historyCard.fs-fallback #previousHistorySection { display: block; }
+#historyCard.fs-fallback .book-dashboard { display: grid; }
+
+@media (max-width: 650px) {
+    .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .dashboard > :nth-child(n+3) { grid-column: 1 / -1; }
+    .dashboard-card { min-height: 84px; padding: 12px; border-radius: 12px; }
+    .dashboard-card h3 { font-size: 10.5px; }
+    .dashboard-card strong { font-size: 17px; }
+
+    .history-table { min-width: 0 !important; display: block; border: none; }
+    .history-table thead { display: none; }
+    .history-table tbody { display: block; }
+    .history-table tbody tr { display: block; border: 1px solid #C9DDE6; border-radius: 12px; margin-bottom: 10px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(30,55,90,.06); }
+    .history-table tbody tr td { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: right; border: none; border-bottom: 1px solid #EDF2F4; padding: 8px 12px; background: transparent !important; font-size: 13px; }
+    .history-table tbody tr td::before { content: attr(data-label); font-weight: 800; color: #35566A; font-size: 11px; text-transform: uppercase; text-align: left; flex: 0 0 auto; }
+    .history-table tbody tr td:not([data-label])::before { content: none; }
+    .history-table tbody tr td[colspan] { display: block; text-align: center; }
+    .history-table tbody tr td.action-column { justify-content: center; border-bottom: none; }
+    .history-table tbody tr td.action-column .btn-struk { width: 100%; height: 40px; font-size: 13px; }
+    .history-table tbody tr td.action-column:empty { display: none; }
+    body.dark-theme .history-table tbody tr { background: #17242E; border-color: #344A56; }
+    body.dark-theme .history-table tbody tr td { border-bottom-color: #253741; color: #DCE8ED; }
+    body.dark-theme .history-table tbody tr td::before { color: #9FB3BF; }
+    .table-wrapper { overflow-x: visible; }
+    .receipt-paper-shadow { margin: 0 auto; }
+}
+
 @media (max-width: 380px) {
     .header { padding: 12px 10px; }
     .header-logo { width: 42px; height: 42px; flex-basis: 42px; }
@@ -1918,19 +1955,19 @@ function renderTable() {
             const pay = getPayInfo(it);
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td>${idx+1}</td>
-                <td>${escapeHTML(it.tanggal)}</td>
-                <td>${escapeHTML(it.waktu)}</td>
-                <td style="font-weight:bold;">${escapeHTML(it.nama)}</td>
-                <td>${escapeHTML(it.jenis)}</td>
-                <td>${it.plastik ? it.plastik + ' Pcs' : '-'}</td>
-                <td>${it.sabun ? it.sabun + ' Sachet' : '-'}</td>
-                <td>${it.pewangi ? it.pewangi + ' Sachet' : '-'}</td>
-                <td>${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(it.harga)+'</span>' : '-'}</td>
-                <td>${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(pay.uang)+'</span>' : '-'}</td>
-                <td>${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(pay.kembali)+'</span>' : '-'}</td>
-                <td>${it.bayar === "SUDAH" ? '<span class="status-paid">✓ Sudah</span>' : '<span class="status-unpaid">✖ Belum</span>'}</td>
-                <td>${it.bayar === "SUDAH" ? escapeHTML(it.metode) : '-'}</td>
+                <td data-label="No">${idx+1}</td>
+                <td data-label="Tanggal">${escapeHTML(it.tanggal)}</td>
+                <td data-label="Jam">${escapeHTML(it.waktu)}</td>
+                <td data-label="Nama" style="font-weight:bold;">${escapeHTML(it.nama)}</td>
+                <td data-label="Jenis Laundry">${escapeHTML(it.jenis)}</td>
+                <td data-label="Plastik">${it.plastik ? it.plastik + ' Pcs' : '-'}</td>
+                <td data-label="Sabun">${it.sabun ? it.sabun + ' Sachet' : '-'}</td>
+                <td data-label="Pewangi">${it.pewangi ? it.pewangi + ' Sachet' : '-'}</td>
+                <td data-label="Harga">${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(it.harga)+'</span>' : '-'}</td>
+                <td data-label="Uang Bayar">${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(pay.uang)+'</span>' : '-'}</td>
+                <td data-label="Kembalian">${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(pay.kembali)+'</span>' : '-'}</td>
+                <td data-label="Status Bayar">${it.bayar === "SUDAH" ? '<span class="status-paid">✓ Sudah</span>' : '<span class="status-unpaid">✖ Belum</span>'}</td>
+                <td data-label="Metode">${it.bayar === "SUDAH" ? escapeHTML(it.metode) : '-'}</td>
                 <td class="action-column">${it.bayar === "SUDAH" ? `<button type="button" class="action-btn btn-struk" onclick="openReceiptModal(${it.id})">Struk</button>` : ''}</td>
             `;
             target.appendChild(tr);
@@ -2328,6 +2365,211 @@ window.printReceiptIframe = function() {
 };
 
 // ---------------------------------------------------------
+// STRUK SEBAGAI GAMBAR (PNG) UNTUK WHATSAPP
+// ---------------------------------------------------------
+function loadLogoImage() {
+    return new Promise(resolve => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = () => resolve(null);
+        im.src = RECEIPT_LOGO_SRC;
+    });
+}
+
+function drawReceiptCanvas(it, logoImg) {
+    const W = 384, S = 2, PAD = 14, CW = W - PAD * 2;
+    const FONT = "'Courier New', Courier, monospace";
+    const lunas = it.bayar === "SUDAH";
+    const jenisFull = getJenisLaundryFullName(it.jenis);
+    const pay = getPayInfo(it);
+
+    const items = [];
+    items.push({ k: "gap", h: 2 });
+    items.push({ k: "logo" });
+    items.push({ k: "t", s: storeInfo.name, sz: 17, b: true, a: "c" });
+    items.push({ k: "t", s: storeInfo.tagline, sz: 12, b: true, a: "c" });
+    items.push({ k: "t", s: storeInfo.address, sz: 11, a: "c" });
+    items.push({ k: "t", s: "Telp/WA: " + storeInfo.phone, sz: 11, a: "c" });
+    items.push({ k: "div", style: "dash" });
+    items.push({ k: "row", l: "No. Struk", r: receiptNo(it), b2: true });
+    items.push({ k: "row", l: "Tanggal", r: it.tanggal });
+    items.push({ k: "row", l: "Waktu", r: it.waktu });
+    items.push({ k: "row", l: "Customer", r: it.nama, b2: true });
+    items.push({ k: "div", style: "dash" });
+    items.push({ k: "t", s: "LAYANAN", sz: 13, b: true, a: "l" });
+    items.push({ k: "t", s: jenisFull, sz: 13, b: true, a: "l" });
+    if (Number(it.plastik) > 0) items.push({ k: "row", l: "• Plastik", r: it.plastik + " Pcs" });
+    if (Number(it.sabun) > 0) items.push({ k: "row", l: "• Sabun Cuci", r: it.sabun + " Sachet" });
+    if (Number(it.pewangi) > 0) items.push({ k: "row", l: "• Pewangi", r: it.pewangi + " Sachet" });
+    items.push({ k: "div", style: "dash" });
+    items.push({ k: "stamp", l: "Status", r: lunas ? "LUNAS" : "BELUM", c: lunas ? "#059669" : "#dc2626", ok: lunas });
+    if (lunas) items.push({ k: "row", l: "Metode", r: it.metode || "-", b2: true });
+    items.push({ k: "div", style: "solid" });
+    items.push({ k: "row", l: "TOTAL", r: formatRupiah(it.harga), sz: 17, b: true });
+    if (lunas) {
+        items.push({ k: "row", l: "Uang Bayar", r: formatRupiah(pay.uang), b2: true });
+        items.push({ k: "row", l: "Kembalian", r: formatRupiah(pay.kembali), b2: true });
+    }
+    items.push({ k: "div", style: "dash" });
+    items.push({ k: "gap", h: 4 });
+    items.push({ k: "t", s: "TERIMA KASIH BANYAK", sz: 13, b: true, a: "c" });
+    items.push({ k: "t", s: storeInfo.footer, sz: 11, a: "c" });
+    items.push({ k: "t", s: "*** " + storeInfo.name + " ***", sz: 12, b: true, a: "c" });
+
+    function run(ctx, draw) {
+        let y = 16;
+        ctx.textBaseline = "top";
+        const setF = (sz, b) => { ctx.font = (b ? "bold " : "") + sz + "px " + FONT; };
+        const wrap = (s, sz, b, maxW) => {
+            setF(sz, b);
+            const words = String(s).split(/\s+/);
+            const lines = [];
+            let cur = "";
+            words.forEach(w => {
+                const t = cur ? cur + " " + w : w;
+                if (ctx.measureText(t).width <= maxW || !cur) cur = t;
+                else { lines.push(cur); cur = w; }
+            });
+            if (cur) lines.push(cur);
+            return lines;
+        };
+        const text = (s, x, yy, align, color) => {
+            ctx.textAlign = align;
+            ctx.fillStyle = color || "#000";
+            ctx.fillText(s, x, yy);
+        };
+
+        items.forEach(m => {
+            if (m.k === "gap") {
+                y += m.h;
+            } else if (m.k === "logo") {
+                if (logoImg && logoImg.naturalWidth) {
+                    const ratio = logoImg.naturalWidth / logoImg.naturalHeight;
+                    let h = 66, w = h * ratio;
+                    if (w > 120) { w = 120; h = w / ratio; }
+                    if (draw) ctx.drawImage(logoImg, (W - w) / 2, y, w, h);
+                    y += h + 6;
+                }
+            } else if (m.k === "t") {
+                const lh = Math.round(m.sz * 1.4);
+                wrap(m.s, m.sz, m.b, CW).forEach(line => {
+                    if (draw) {
+                        setF(m.sz, m.b);
+                        if (m.a === "c") text(line, W / 2, y, "center");
+                        else text(line, PAD, y, "left");
+                    }
+                    y += lh;
+                });
+            } else if (m.k === "row" || m.k === "stamp") {
+                const sz = m.sz || 13;
+                const lh = Math.round(sz * 1.45);
+                const isStamp = m.k === "stamp";
+                setF(sz, m.b);
+                const lw = ctx.measureText(m.l).width;
+                setF(sz, m.b || m.b2 || isStamp);
+                const rw = ctx.measureText(m.r).width + (isStamp ? 14 + 18 : 0);
+                if (lw + rw + 10 <= CW) {
+                    if (draw) {
+                        setF(sz, m.b);
+                        text(m.l, PAD, y, "left");
+                        setF(sz, m.b || m.b2 || isStamp);
+                        if (isStamp) {
+                            const bx = PAD + CW - rw, by = y - 2, bh = lh;
+                            ctx.save();
+                            ctx.setLineDash([3, 2]);
+                            ctx.lineWidth = 1.5;
+                            ctx.strokeStyle = m.c;
+                            ctx.strokeRect(bx, by, rw, bh);
+                            ctx.restore();
+                            // ikon ceklis / silang digambar langsung agar selalu jelas
+                            const ix = bx + 8, cy = y + lh / 2 - 2;
+                            ctx.save();
+                            ctx.strokeStyle = m.c;
+                            ctx.lineWidth = 2.6;
+                            ctx.lineCap = "round";
+                            ctx.lineJoin = "round";
+                            ctx.setLineDash([]);
+                            ctx.beginPath();
+                            if (m.ok) {
+                                ctx.moveTo(ix, cy);
+                                ctx.lineTo(ix + 4, cy + 4.5);
+                                ctx.lineTo(ix + 11, cy - 4.5);
+                            } else {
+                                ctx.moveTo(ix + 1, cy - 4.5);
+                                ctx.lineTo(ix + 10, cy + 4.5);
+                                ctx.moveTo(ix + 10, cy - 4.5);
+                                ctx.lineTo(ix + 1, cy + 4.5);
+                            }
+                            ctx.stroke();
+                            ctx.restore();
+                            text(m.r, ix + 18, y, "left", m.c);
+                        } else {
+                            text(m.r, PAD + CW, y, "right");
+                        }
+                    }
+                    y += lh + (isStamp ? 4 : 0);
+                } else {
+                    wrap(m.l, sz, m.b, CW).forEach(line => {
+                        if (draw) { setF(sz, m.b); text(line, PAD, y, "left"); }
+                        y += lh;
+                    });
+                    if (draw) {
+                        setF(sz, m.b || m.b2 || isStamp);
+                        text(m.r, PAD + CW, y, "right", isStamp ? m.c : "#000");
+                    }
+                    y += lh;
+                }
+            } else if (m.k === "div") {
+                y += 4;
+                if (draw) {
+                    ctx.save();
+                    ctx.strokeStyle = "#000";
+                    if (m.style === "dash") { ctx.setLineDash([4, 3]); ctx.lineWidth = 1; }
+                    else { ctx.lineWidth = 2; }
+                    ctx.beginPath();
+                    ctx.moveTo(PAD, y + 0.5);
+                    ctx.lineTo(PAD + CW, y + 0.5);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+                y += 7;
+            }
+        });
+        return y;
+    }
+
+    const mctx = document.createElement("canvas").getContext("2d");
+    const totalH = Math.ceil(run(mctx, false) + 18);
+    const canvas = document.createElement("canvas");
+    canvas.width = W * S;
+    canvas.height = totalH * S;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(S, S);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, totalH);
+    run(ctx, true);
+    return canvas;
+}
+
+function canvasToBlob(canvas) {
+    return new Promise((resolve, reject) => {
+        try {
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error("blob kosong")), "image/png");
+        } catch (e) { reject(e); }
+    });
+}
+
+async function receiptToBlob(it) {
+    const logo = await loadLogoImage();
+    try {
+        return await canvasToBlob(drawReceiptCanvas(it, logo));
+    } catch (e) {
+        // Jika canvas terblokir karena logo (mis. dibuka via file://), buat tanpa logo
+        return await canvasToBlob(drawReceiptCanvas(it, null));
+    }
+}
+
+// ---------------------------------------------------------
 // KIRIM STRUK KE WHATSAPP (LANGSUNG KE NOMOR TUJUAN, TANPA DOWNLOAD)
 // Isi struk dikirim sebagai teks monospasi dengan susunan yang sama persis
 // dengan struk di sistem (header toko, rincian, status, total, uang bayar, kembalian, penutup).
@@ -2408,7 +2650,7 @@ function normalizeWaPhone(v) {
     return p;
 }
 
-window.sendReceiptWA = function() {
+window.sendReceiptWA = async function() {
     if (!currentActiveReceipt) return;
     const it = currentActiveReceipt;
     const raw = document.getElementById("custWaInput").value;
@@ -2417,30 +2659,64 @@ window.sendReceiptWA = function() {
         alert("Nomor WhatsApp tidak valid. Periksa kembali nomornya.");
         return;
     }
+    const btn = document.getElementById("waSendBtn");
+    const oldText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Menyiapkan...";
 
-    const msg = encodeURIComponent(buildReceiptWaText(it));
-    const appUrl = phone
-        ? `whatsapp://send?phone=${phone}&text=${msg}`
-        : `whatsapp://send?text=${msg}`;
-    const webUrl = phone
-        ? `https://api.whatsapp.com/send?phone=${phone}&text=${msg}`
-        : `https://api.whatsapp.com/send?text=${msg}`;
+    try {
+        // Foto struk (sama persis dengan struk di sistem) disalin ke clipboard, TANPA download
+        const blobPromise = receiptToBlob(it);
+        let copied = false;
+        try {
+            if (navigator.clipboard && window.ClipboardItem) {
+                await navigator.clipboard.write([new ClipboardItem({ "image/png": blobPromise })]);
+                copied = true;
+            }
+        } catch (err) { copied = false; }
 
-    // Buka aplikasi WhatsApp langsung ke nomor tujuan; jika aplikasi tidak ada, buka WhatsApp Web
-    let leftPage = false;
-    const onLeave = () => { leftPage = true; };
-    window.addEventListener("blur", onLeave, { once: true });
-    document.addEventListener("visibilitychange", onLeave, { once: true });
-    window.location.href = appUrl;
-    setTimeout(() => {
-        window.removeEventListener("blur", onLeave);
-        document.removeEventListener("visibilitychange", onLeave);
-        if (!leftPage) window.open(webUrl, "_blank");
-    }, 1800);
+        let blob = null;
+        try { blob = await blobPromise; } catch (err) { blob = null; }
+        if (!blob) { alert("Gagal membuat foto struk."); return; }
 
-    showToast(phone
-        ? "Membuka WhatsApp ke +" + phone + ". Tekan Kirim di chat."
-        : "Membuka WhatsApp. Pilih kontak tujuan lalu tekan Kirim.", 5000);
+        // Clipboard tidak didukung: bagikan foto lewat menu bagikan HP (pilih WhatsApp)
+        if (!copied) {
+            const safeName = String(it.nama || "customer").replace(/[^\w]+/g, "_");
+            const file = new File([blob], `Struk_${safeName}_${it.noStruk || String(it.id).slice(-6)}.png`, { type: "image/png" });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file], title: "Struk " + storeInfo.name });
+                    return;
+                } catch (err) {
+                    if (err && err.name === "AbortError") return;
+                }
+            }
+            // Cadangan terakhir: kirim sebagai teks struk
+            const textUrl = `https://api.whatsapp.com/send?${phone ? "phone=" + phone + "&" : ""}text=${encodeURIComponent(buildReceiptWaText(it))}`;
+            window.open(textUrl, "_blank");
+            showToast("Browser tidak bisa menyalin foto, struk dikirim sebagai teks.", 5000);
+            return;
+        }
+
+        // Langsung buka chat WhatsApp ke nomor tujuan
+        const appUrl = phone ? `whatsapp://send?phone=${phone}` : `whatsapp://send`;
+        const webUrl = phone ? `https://api.whatsapp.com/send?phone=${phone}` : `https://api.whatsapp.com/send`;
+        let leftPage = false;
+        const onLeave = () => { leftPage = true; };
+        window.addEventListener("blur", onLeave, { once: true });
+        document.addEventListener("visibilitychange", onLeave, { once: true });
+        window.location.href = appUrl;
+        setTimeout(() => {
+            window.removeEventListener("blur", onLeave);
+            document.removeEventListener("visibilitychange", onLeave);
+            if (!leftPage) window.open(webUrl, "_blank");
+        }, 1800);
+
+        showToast("Foto struk sudah disalin. Di chat WhatsApp" + (phone ? " (+" + phone + ")" : "") + " tempel (Ctrl+V / tahan lalu Tempel), lalu tekan Kirim.", 8000);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+    }
 };
 
 window.copyReceiptText = function() {
@@ -2667,10 +2943,30 @@ document.getElementById("dateFilter").addEventListener("change", renderTable);
 // Layar penuh tabel pembukuan
 document.getElementById("historyFullscreenBtn").addEventListener("click", () => {
     const el = document.getElementById("historyCard");
+    const setFallback = on => {
+        el.classList.toggle("fs-fallback", on);
+        document.body.classList.toggle("fs-lock", on);
+        if (on) el.scrollTop = 0;
+        renderTable();
+    };
     if (document.fullscreenElement) {
         document.exitFullscreen();
-    } else if (el.requestFullscreen) {
-        el.requestFullscreen().catch(() => {});
+    } else if (el.classList.contains("fs-fallback")) {
+        setFallback(false);
+    } else if (window.matchMedia("(max-width: 650px)").matches || !el.requestFullscreen) {
+        // HP: pakai layar penuh bawaan halaman (berfungsi juga di iPhone)
+        setFallback(true);
+    } else {
+        el.requestFullscreen().catch(() => setFallback(true));
+    }
+});
+document.addEventListener("keydown", (e) => {
+    const el = document.getElementById("historyCard");
+    if (e.key === "Escape" && el.classList.contains("fs-fallback") &&
+        document.getElementById("receiptModal").style.display === "none") {
+        el.classList.remove("fs-fallback");
+        document.body.classList.remove("fs-lock");
+        renderTable();
     }
 });
 function onFullscreenChange() {
