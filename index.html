@@ -890,6 +890,17 @@ body.dark-theme .adm-form-grid input:disabled,
 body.dark-theme .adm-form-grid select:disabled,
 body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F95A1; }
 
+/* Dashboard mini di Pembukuan & Riwayat (tampil saat tabel diperbesar) */
+.book-dashboard { display: none; margin: 0 0 16px; }
+#historyCard:fullscreen .book-dashboard,
+#historyCard:-webkit-full-screen .book-dashboard { display: grid; }
+.book-dashboard .dashboard-card { min-height: 92px; }
+#previousHistorySection .book-dashboard { margin-top: 0; }
+#previousHistorySection .dashboard-card h3,
+#previousHistorySection .dashboard-card strong,
+body.dark-theme #previousHistorySection .dashboard-card h3,
+body.dark-theme #previousHistorySection .dashboard-card strong { color: #fff !important; }
+
 /* Responsive HP */
 @media (max-width: 650px) {
     body { padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); }
@@ -1102,6 +1113,28 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
                 <input type="text" id="search" class="search-box" placeholder="Cari nama...">
             </div>
         </div>
+        <div class="dashboard book-dashboard" id="tdDash">
+            <div class="dashboard-card blue">
+                <h3>Total Transaksi</h3>
+                <strong id="tdTotal">0</strong>
+            </div>
+            <div class="dashboard-card teal">
+                <h3 id="tdCoinLabel">Koin Hari Ini</h3>
+                <strong id="tdCoin">0 Koin</strong>
+            </div>
+            <div class="dashboard-card orange">
+                <h3>CASH / QRIS (TRANSAKSI)</h3>
+                <strong id="tdMetode">0 / 0</strong>
+            </div>
+            <div class="dashboard-card dark">
+                <h3>CASH / QRIS (RP)</h3>
+                <strong id="tdCashQris">Rp 0 / Rp 0</strong>
+            </div>
+            <div class="dashboard-card purple">
+                <h3 id="tdPendLabel">Pendapatan Hari Ini</h3>
+                <strong id="tdPend">Rp 0</strong>
+            </div>
+        </div>
         <div class="table-wrapper">
             <table class="history-table">
                 <thead>
@@ -1127,6 +1160,28 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
         </div>
         <section id="previousHistorySection" aria-label="Riwayat pembukuan hari sebelumnya">
             <h3>Riwayat Pembukuan Hari Sebelumnya</h3>
+        <div class="dashboard book-dashboard" id="pvDash">
+            <div class="dashboard-card blue">
+                <h3>Total Transaksi</h3>
+                <strong id="pvTotal">0</strong>
+            </div>
+            <div class="dashboard-card teal">
+                <h3 id="pvCoinLabel">Koin (Semua Tanggal)</h3>
+                <strong id="pvCoin">0 Koin</strong>
+            </div>
+            <div class="dashboard-card orange">
+                <h3>CASH / QRIS (TRANSAKSI)</h3>
+                <strong id="pvMetode">0 / 0</strong>
+            </div>
+            <div class="dashboard-card dark">
+                <h3>CASH / QRIS (RP)</h3>
+                <strong id="pvCashQris">Rp 0 / Rp 0</strong>
+            </div>
+            <div class="dashboard-card purple">
+                <h3 id="pvPendLabel">Pendapatan (Semua Tanggal)</h3>
+                <strong id="pvPend">Rp 0</strong>
+            </div>
+        </div>
             <div class="table-wrapper">
                 <table class="history-table">
                     <thead><tr>
@@ -1448,6 +1503,22 @@ function getPayInfo(it) {
     return { uang, kembali };
 }
 
+// Saat tabel pembukuan layar penuh, hanya elemen di dalam layar penuh yang terlihat.
+// Maka modal struk, toast & status dipindahkan ke dalam elemen layar penuh agar
+// struk bisa langsung dibuka tanpa keluar dari layar penuh.
+const OVERLAY_IDS = ["receiptModal", "accessModal", "adminModal", "appToast", "statusPop"];
+function overlayHost() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.body;
+}
+function placeOverlay(el) {
+    if (!el) return;
+    const host = overlayHost();
+    if (el.parentNode !== host) host.appendChild(el);
+}
+function syncOverlays() {
+    OVERLAY_IDS.forEach(id => placeOverlay(document.getElementById(id)));
+}
+
 let toastTimer = null;
 function showToast(msg, ms) {
     let t = document.getElementById("appToast");
@@ -1457,6 +1528,7 @@ function showToast(msg, ms) {
         t.className = "toast";
         document.body.appendChild(t);
     }
+    placeOverlay(t);
     t.textContent = msg;
     t.style.display = "block";
     clearTimeout(toastTimer);
@@ -1473,6 +1545,7 @@ function showStatus(type, msg) {
         el.className = "status-pop";
         document.body.appendChild(el);
     }
+    placeOverlay(el);
     const mark = type === "del"
         ? '<path class="mark" d="M30 30 L50 50 M50 30 L30 50"/>'
         : '<path class="mark" d="M26 41 L36 51 L55 30"/>';
@@ -1887,6 +1960,37 @@ function renderTable() {
     document.getElementById("totalPendapatan").textContent = formatRupiah(totalRp);
     document.getElementById("printTotal").textContent = "Pendapatan Hari Ini: " + formatRupiah(totalRp);
     document.getElementById("previousPrintTotal").textContent = "Total Pendapatan Riwayat: " + formatRupiah(previousIncome);
+
+    // Dashboard di Pembukuan (hari ini) & Riwayat (tanggal dipilih), ikut filter nama/tanggal
+    function summarize(rows) {
+        const r = { count: rows.length, coin: 0, cCash: 0, cQris: 0, rpCash: 0, rpQris: 0, total: 0 };
+        rows.forEach(it => {
+            r.coin += Number(it.koin) || getDefaultCoins(it.jenis);
+            if (it.bayar === "SUDAH") {
+                const h = Number(it.harga) || 0;
+                r.total += h;
+                if (it.metode === "CASH") { r.rpCash += h; r.cCash++; }
+                else if (it.metode === "QRIS") { r.rpQris += h; r.cQris++; }
+            }
+        });
+        return r;
+    }
+    function fillDash(p, r, coinLabel, pendLabel) {
+        const set = (id, v) => { const el = document.getElementById(p + id); if (el) el.textContent = v; };
+        set("Total", r.count);
+        set("Coin", r.coin + " Koin");
+        set("Metode", `${r.cCash} / ${r.cQris}`);
+        set("CashQris", `${formatRupiah(r.rpCash)} / ${formatRupiah(r.rpQris)}`);
+        set("Pend", formatRupiah(r.total));
+        set("CoinLabel", coinLabel);
+        set("PendLabel", pendLabel);
+    }
+    const tdSum = summarize(todayRows);
+    // Tanpa pencarian, koin hari ini mengikuti penghitung koin harian (sama dengan dashboard utama)
+    if (!s) tdSum.coin = dailyCoin.count;
+    fillDash("td", tdSum, "Koin Hari Ini", "Pendapatan Hari Ini");
+    const dLabel = d ? isoToDmy(d) : "Semua Tanggal";
+    fillDash("pv", summarize(previousRows), `Koin (${dLabel})`, `Pendapatan (${dLabel})`);
 }
 
 // =========================================================
@@ -2099,6 +2203,7 @@ window.del = function(id) {
 window.openReceiptModal = function(id) {
     const it = data.find(x => x.id === id);
     if (!it) return;
+    syncOverlays();
     currentActiveReceipt = it;
     const fullJenis = getJenisLaundryFullName(it.jenis);
     const pay = getPayInfo(it);
@@ -2216,288 +2321,119 @@ window.printReceiptIframe = function() {
 };
 
 // ---------------------------------------------------------
-// STRUK SEBAGAI GAMBAR (PNG) UNTUK WHATSAPP
+// KIRIM STRUK KE WHATSAPP (LANGSUNG KE NOMOR TUJUAN, TANPA DOWNLOAD)
+// Isi struk dikirim sebagai teks monospasi dengan susunan yang sama persis
+// dengan struk di sistem (header toko, rincian, status, total, uang bayar, kembalian, penutup).
 // ---------------------------------------------------------
-function loadLogoImage() {
-    return new Promise(resolve => {
-        const im = new Image();
-        im.onload = () => resolve(im);
-        im.onerror = () => resolve(null);
-        im.src = RECEIPT_LOGO_SRC;
+const WA_W = 32; // lebar kolom struk 58mm
+
+function waWrap(str, w) {
+    const words = String(str == null ? "" : str).split(/\s+/).filter(Boolean);
+    const lines = [];
+    let cur = "";
+    words.forEach(word => {
+        while (word.length > w) {
+            if (cur) { lines.push(cur); cur = ""; }
+            lines.push(word.slice(0, w));
+            word = word.slice(w);
+        }
+        const t = cur ? cur + " " + word : word;
+        if (t.length <= w) cur = t;
+        else { lines.push(cur); cur = word; }
     });
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [""];
+}
+function waCenter(str) {
+    return waWrap(str, WA_W).map(l => " ".repeat(Math.max(0, Math.floor((WA_W - l.length) / 2))) + l);
+}
+function waRow(l, r) {
+    l = String(l); r = String(r == null ? "" : r);
+    if (l.length + r.length + 1 <= WA_W) return [l + " ".repeat(WA_W - l.length - r.length) + r];
+    const out = waWrap(l, WA_W);
+    waWrap(r, WA_W).forEach(x => out.push(" ".repeat(WA_W - x.length) + x));
+    return out;
 }
 
-function drawReceiptCanvas(it, logoImg) {
-    const W = 384, S = 2, PAD = 14, CW = W - PAD * 2;
-    const FONT = "'Courier New', Courier, monospace";
+function buildReceiptWaText(it) {
     const lunas = it.bayar === "SUDAH";
-    const jenisFull = getJenisLaundryFullName(it.jenis);
     const pay = getPayInfo(it);
-
-    const items = [];
-    items.push({ k: "gap", h: 2 });
-    items.push({ k: "logo" });
-    items.push({ k: "t", s: storeInfo.name, sz: 17, b: true, a: "c" });
-    items.push({ k: "t", s: storeInfo.tagline, sz: 12, b: true, a: "c" });
-    items.push({ k: "t", s: storeInfo.address, sz: 11, a: "c" });
-    items.push({ k: "t", s: "Telp/WA: " + storeInfo.phone, sz: 11, a: "c" });
-    items.push({ k: "div", style: "dash" });
-    items.push({ k: "row", l: "No. Struk", r: receiptNo(it), b2: true });
-    items.push({ k: "row", l: "Tanggal", r: it.tanggal });
-    items.push({ k: "row", l: "Waktu", r: it.waktu });
-    items.push({ k: "row", l: "Customer", r: it.nama, b2: true });
-    items.push({ k: "div", style: "dash" });
-    items.push({ k: "t", s: "LAYANAN", sz: 13, b: true, a: "l" });
-    items.push({ k: "t", s: jenisFull, sz: 13, b: true, a: "l" });
-    if (Number(it.plastik) > 0) items.push({ k: "row", l: "• Plastik", r: it.plastik + " Pcs" });
-    if (Number(it.sabun) > 0) items.push({ k: "row", l: "• Sabun Cuci", r: it.sabun + " Sachet" });
-    if (Number(it.pewangi) > 0) items.push({ k: "row", l: "• Pewangi", r: it.pewangi + " Sachet" });
-    items.push({ k: "div", style: "dash" });
-    items.push({ k: "stamp", l: "Status", r: lunas ? "LUNAS" : "BELUM", c: lunas ? "#059669" : "#dc2626", ok: lunas });
-    if (lunas) items.push({ k: "row", l: "Metode", r: it.metode || "-", b2: true });
-    items.push({ k: "div", style: "solid" });
-    items.push({ k: "row", l: "TOTAL", r: formatRupiah(it.harga), sz: 17, b: true });
+    const dash = "-".repeat(WA_W);
+    const dbl = "=".repeat(WA_W);
+    const L = [];
+    waCenter(storeInfo.name).forEach(x => L.push(x));
+    waCenter(storeInfo.tagline).forEach(x => L.push(x));
+    waCenter(storeInfo.address).forEach(x => L.push(x));
+    waCenter("Telp/WA: " + storeInfo.phone).forEach(x => L.push(x));
+    L.push(dash);
+    L.push(...waRow("No. Struk", receiptNo(it)));
+    L.push(...waRow("Tanggal", it.tanggal));
+    L.push(...waRow("Waktu", it.waktu));
+    L.push(...waRow("Customer", it.nama));
+    L.push(dash);
+    L.push("LAYANAN");
+    waWrap(getJenisLaundryFullName(it.jenis), WA_W).forEach(x => L.push(x));
+    if (Number(it.plastik) > 0) L.push(...waRow("• Plastik", it.plastik + " Pcs"));
+    if (Number(it.sabun) > 0) L.push(...waRow("• Sabun Cuci", it.sabun + " Sachet"));
+    if (Number(it.pewangi) > 0) L.push(...waRow("• Pewangi", it.pewangi + " Sachet"));
+    L.push(dash);
+    L.push(...waRow("Status", lunas ? "✓ LUNAS" : "✖ BELUM"));
+    if (lunas) L.push(...waRow("Metode", it.metode || "-"));
+    L.push(dbl);
+    L.push(...waRow("TOTAL", formatRupiah(it.harga)));
+    L.push(dbl);
     if (lunas) {
-        items.push({ k: "row", l: "Uang Bayar", r: formatRupiah(pay.uang), b2: true });
-        items.push({ k: "row", l: "Kembalian", r: formatRupiah(pay.kembali), b2: true });
+        L.push(...waRow("Uang Bayar", formatRupiah(pay.uang)));
+        L.push(...waRow("Kembalian", formatRupiah(pay.kembali)));
     }
-    items.push({ k: "div", style: "dash" });
-    items.push({ k: "gap", h: 4 });
-    items.push({ k: "t", s: "TERIMA KASIH BANYAK", sz: 13, b: true, a: "c" });
-    items.push({ k: "t", s: storeInfo.footer, sz: 11, a: "c" });
-    items.push({ k: "t", s: "*** " + storeInfo.name + " ***", sz: 12, b: true, a: "c" });
-
-    function run(ctx, draw) {
-        let y = 16;
-        ctx.textBaseline = "top";
-        const setF = (sz, b) => { ctx.font = (b ? "bold " : "") + sz + "px " + FONT; };
-        const wrap = (s, sz, b, maxW) => {
-            setF(sz, b);
-            const words = String(s).split(/\s+/);
-            const lines = [];
-            let cur = "";
-            words.forEach(w => {
-                const t = cur ? cur + " " + w : w;
-                if (ctx.measureText(t).width <= maxW || !cur) cur = t;
-                else { lines.push(cur); cur = w; }
-            });
-            if (cur) lines.push(cur);
-            return lines;
-        };
-        const text = (s, x, yy, align, color) => {
-            ctx.textAlign = align;
-            ctx.fillStyle = color || "#000";
-            ctx.fillText(s, x, yy);
-        };
-
-        items.forEach(m => {
-            if (m.k === "gap") {
-                y += m.h;
-            } else if (m.k === "logo") {
-                if (logoImg && logoImg.naturalWidth) {
-                    const ratio = logoImg.naturalWidth / logoImg.naturalHeight;
-                    let h = 66, w = h * ratio;
-                    if (w > 120) { w = 120; h = w / ratio; }
-                    if (draw) ctx.drawImage(logoImg, (W - w) / 2, y, w, h);
-                    y += h + 6;
-                }
-            } else if (m.k === "t") {
-                const lh = Math.round(m.sz * 1.4);
-                wrap(m.s, m.sz, m.b, CW).forEach(line => {
-                    if (draw) {
-                        setF(m.sz, m.b);
-                        if (m.a === "c") text(line, W / 2, y, "center");
-                        else text(line, PAD, y, "left");
-                    }
-                    y += lh;
-                });
-            } else if (m.k === "row" || m.k === "stamp") {
-                const sz = m.sz || 13;
-                const lh = Math.round(sz * 1.45);
-                const isStamp = m.k === "stamp";
-                setF(sz, m.b);
-                const lw = ctx.measureText(m.l).width;
-                setF(sz, m.b || m.b2 || isStamp);
-                const rw = ctx.measureText(m.r).width + (isStamp ? 14 + 18 : 0);
-                if (lw + rw + 10 <= CW) {
-                    if (draw) {
-                        setF(sz, m.b);
-                        text(m.l, PAD, y, "left");
-                        setF(sz, m.b || m.b2 || isStamp);
-                        if (isStamp) {
-                            const bx = PAD + CW - rw, by = y - 2, bh = lh;
-                            ctx.save();
-                            ctx.setLineDash([3, 2]);
-                            ctx.lineWidth = 1.5;
-                            ctx.strokeStyle = m.c;
-                            ctx.strokeRect(bx, by, rw, bh);
-                            ctx.restore();
-                            // ikon ceklis / silang digambar langsung agar selalu jelas
-                            const ix = bx + 8, cy = y + lh / 2 - 2;
-                            ctx.save();
-                            ctx.strokeStyle = m.c;
-                            ctx.lineWidth = 2.6;
-                            ctx.lineCap = "round";
-                            ctx.lineJoin = "round";
-                            ctx.setLineDash([]);
-                            ctx.beginPath();
-                            if (m.ok) {
-                                ctx.moveTo(ix, cy);
-                                ctx.lineTo(ix + 4, cy + 4.5);
-                                ctx.lineTo(ix + 11, cy - 4.5);
-                            } else {
-                                ctx.moveTo(ix + 1, cy - 4.5);
-                                ctx.lineTo(ix + 10, cy + 4.5);
-                                ctx.moveTo(ix + 10, cy - 4.5);
-                                ctx.lineTo(ix + 1, cy + 4.5);
-                            }
-                            ctx.stroke();
-                            ctx.restore();
-                            text(m.r, ix + 18, y, "left", m.c);
-                        } else {
-                            text(m.r, PAD + CW, y, "right");
-                        }
-                    }
-                    y += lh + (isStamp ? 4 : 0);
-                } else {
-                    wrap(m.l, sz, m.b, CW).forEach(line => {
-                        if (draw) { setF(sz, m.b); text(line, PAD, y, "left"); }
-                        y += lh;
-                    });
-                    if (draw) {
-                        setF(sz, m.b || m.b2 || isStamp);
-                        text(m.r, PAD + CW, y, "right", isStamp ? m.c : "#000");
-                    }
-                    y += lh;
-                }
-            } else if (m.k === "div") {
-                y += 4;
-                if (draw) {
-                    ctx.save();
-                    ctx.strokeStyle = "#000";
-                    if (m.style === "dash") { ctx.setLineDash([4, 3]); ctx.lineWidth = 1; }
-                    else { ctx.lineWidth = 2; }
-                    ctx.beginPath();
-                    ctx.moveTo(PAD, y + 0.5);
-                    ctx.lineTo(PAD + CW, y + 0.5);
-                    ctx.stroke();
-                    ctx.restore();
-                }
-                y += 7;
-            }
-        });
-        return y;
-    }
-
-    const mctx = document.createElement("canvas").getContext("2d");
-    const totalH = Math.ceil(run(mctx, false) + 18);
-    const canvas = document.createElement("canvas");
-    canvas.width = W * S;
-    canvas.height = totalH * S;
-    const ctx = canvas.getContext("2d");
-    ctx.scale(S, S);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, W, totalH);
-    run(ctx, true);
-    return canvas;
+    L.push(dbl);
+    waCenter("TERIMA KASIH BANYAK").forEach(x => L.push(x));
+    waCenter(storeInfo.footer).forEach(x => L.push(x));
+    waCenter("*** " + storeInfo.name + " ***").forEach(x => L.push(x));
+    return "```\n" + L.join("\n") + "\n```";
 }
 
-function canvasToBlob(canvas) {
-    return new Promise((resolve, reject) => {
-        try {
-            canvas.toBlob(b => b ? resolve(b) : reject(new Error("blob kosong")), "image/png");
-        } catch (e) { reject(e); }
-    });
+function normalizeWaPhone(v) {
+    let p = String(v || "").replace(/[^\d]/g, "");
+    if (!p) return "";
+    if (p.startsWith("0")) p = "62" + p.slice(1);
+    else if (p.startsWith("8")) p = "62" + p;
+    return p;
 }
 
-async function receiptToBlob(it) {
-    const logo = await loadLogoImage();
-    try {
-        return await canvasToBlob(drawReceiptCanvas(it, logo));
-    } catch (e) {
-        // Jika canvas terblokir karena logo (mis. dibuka via file://), buat tanpa logo
-        return await canvasToBlob(drawReceiptCanvas(it, null));
-    }
-}
-
-window.sendReceiptWA = async function() {
+window.sendReceiptWA = function() {
     if (!currentActiveReceipt) return;
     const it = currentActiveReceipt;
-    const btn = document.getElementById("waSendBtn");
-    const oldText = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "Membuat...";
-
-    try {
-        let blob;
-        try {
-            blob = await receiptToBlob(it);
-        } catch (err) {
-            alert("Gagal membuat foto struk.");
-            return;
-        }
-
-        const safeName = String(it.nama || "customer").replace(/[^\w]+/g, "_");
-        const fileName = `Struk_${safeName}_${it.noStruk || String(it.id).slice(-6)}.png`;
-        const file = new File([blob], fileName, { type: "image/png" });
-
-        // 1) HP / browser yang mendukung share file: foto struk langsung dibagikan ke WhatsApp
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({ files: [file], title: "Struk " + storeInfo.name });
-                return;
-            } catch (err) {
-                if (err && err.name === "AbortError") return;
-            }
-        }
-
-        // 2) Komputer: salin foto ke clipboard + simpan PNG + buka aplikasi WhatsApp
-        let copied = false;
-        try {
-            if (navigator.clipboard && window.ClipboardItem) {
-                await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-                copied = true;
-            }
-        } catch (err) { copied = false; }
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
-
-        let phone = document.getElementById("custWaInput").value.replace(/[^\d]/g, "");
-        if (phone.startsWith("0")) phone = "62" + phone.slice(1);
-        const msg = encodeURIComponent("Terima kasih, berikut struk laundry Anda.");
-        const appUrl = phone
-            ? `whatsapp://send?phone=${phone}&text=${msg}`
-            : `whatsapp://send?text=${msg}`;
-        const webUrl = phone
-            ? `https://api.whatsapp.com/send?phone=${phone}&text=${msg}`
-            : `https://api.whatsapp.com/send?text=${msg}`;
-
-        // Buka aplikasi WhatsApp langsung; jika aplikasi tidak ada, buka WhatsApp Web
-        let leftPage = false;
-        const onLeave = () => { leftPage = true; };
-        window.addEventListener("blur", onLeave, { once: true });
-        document.addEventListener("visibilitychange", onLeave, { once: true });
-        window.location.href = appUrl;
-        setTimeout(() => {
-            window.removeEventListener("blur", onLeave);
-            document.removeEventListener("visibilitychange", onLeave);
-            if (!leftPage) window.open(webUrl, "_blank");
-        }, 1800);
-
-        showToast(copied
-            ? "Foto struk sudah disalin & disimpan. Di chat WhatsApp tekan Ctrl+V lalu kirim."
-            : "Foto struk sudah disimpan (" + fileName + "). Di chat WhatsApp lampirkan fotonya lalu kirim.", 7000);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = oldText;
+    const raw = document.getElementById("custWaInput").value;
+    const phone = normalizeWaPhone(raw);
+    if (raw.trim() && phone.length < 9) {
+        alert("Nomor WhatsApp tidak valid. Periksa kembali nomornya.");
+        return;
     }
+
+    const msg = encodeURIComponent(buildReceiptWaText(it));
+    const appUrl = phone
+        ? `whatsapp://send?phone=${phone}&text=${msg}`
+        : `whatsapp://send?text=${msg}`;
+    const webUrl = phone
+        ? `https://api.whatsapp.com/send?phone=${phone}&text=${msg}`
+        : `https://api.whatsapp.com/send?text=${msg}`;
+
+    // Buka aplikasi WhatsApp langsung ke nomor tujuan; jika aplikasi tidak ada, buka WhatsApp Web
+    let leftPage = false;
+    const onLeave = () => { leftPage = true; };
+    window.addEventListener("blur", onLeave, { once: true });
+    document.addEventListener("visibilitychange", onLeave, { once: true });
+    window.location.href = appUrl;
+    setTimeout(() => {
+        window.removeEventListener("blur", onLeave);
+        document.removeEventListener("visibilitychange", onLeave);
+        if (!leftPage) window.open(webUrl, "_blank");
+    }, 1800);
+
+    showToast(phone
+        ? "Membuka WhatsApp ke +" + phone + ". Tekan Kirim di chat."
+        : "Membuka WhatsApp. Pilih kontak tujuan lalu tekan Kirim.", 5000);
 };
 
 window.copyReceiptText = function() {
@@ -2704,9 +2640,12 @@ document.getElementById("historyFullscreenBtn").addEventListener("click", () => 
         el.requestFullscreen().catch(() => {});
     }
 });
-document.addEventListener("fullscreenchange", () => {
+function onFullscreenChange() {
+    syncOverlays();
     renderTable();
-});
+}
+document.addEventListener("fullscreenchange", onFullscreenChange);
+document.addEventListener("webkitfullscreenchange", onFullscreenChange);
 
 const themeToggle = document.getElementById("themeToggle");
 if (localStorage.getItem("laundryTheme") === "dark") {
