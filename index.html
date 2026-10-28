@@ -2580,20 +2580,31 @@ function receiptExactBlob() {
             }
         }
 
-        const clone = node.cloneNode(true);
-        clone.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
-        clone.style.margin = "0";
-        const body = new XMLSerializer().serializeToString(clone);
+        // Stempel status dibuat lebih bersih & jelas khusus di gambar
+        css += `.receipt-stamp { border-style: solid !important; border-width: 1.5px !important; border-radius: 6px !important; padding: 2px 9px !important; font-size: 10.5px !important; gap: 5px !important; background: #ecfdf5; line-height: 1.3; }
+.receipt-stamp.belum { background: #fef2f2; }
+.receipt-stamp .stamp-ico { width: 12px !important; height: 12px !important; flex: 0 0 12px; }`;
 
-        const PAD = 16, SAW = 8, S = 2;
-        const TW = W + PAD * 2, TH = H + SAW * 2 + PAD * 2;
+        const clone = node.cloneNode(true);
+        clone.style.margin = "0";
+        clone.style.width = W + "px";
+        clone.style.maxWidth = W + "px";
+        const inner = new XMLSerializer().serializeToString(clone);
+
+        // Gambar dilebarkan (K kali lebih besar dari struk di layar) agar jelas dibaca di WhatsApp
+        const K = 1.6, EXTRA = 10;
+        const BH = Math.ceil((H + EXTRA) * K), BW = Math.ceil(W * K);
+        const body = `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${BW}px;height:${BH}px;background:#fff;overflow:hidden;"><div style="width:${W}px;transform:scale(${K});transform-origin:0 0;">${inner}</div></div>`;
+
+        const PAD = 24, SAW = 12, S = 3;
+        const TW = BW + PAD * 2, TH = BH + SAW * 2 + PAD * 2;
         const sawTop = "M0 8 L5 0 L10 8 L15 0 L20 8 L25 0 L30 8 L35 0 L40 8 L45 0 L50 8 L55 0 L60 8 L65 0 L70 8 L75 0 L80 8 L85 0 L90 8 L95 0 L100 8 Z";
         const sawBottom = "M0 0 L5 8 L10 0 L15 8 L20 0 L25 8 L30 0 L35 8 L40 0 L45 8 L50 0 L55 8 L60 0 L65 8 L70 0 L75 8 L80 0 L85 8 L90 0 L95 8 L100 0 Z";
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${TW}" height="${TH}" viewBox="0 0 ${TW} ${TH}">
 <rect width="100%" height="100%" fill="#e2e8f0"/>
-<svg x="${PAD}" y="${PAD}" width="${W}" height="${SAW}" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="${sawTop}" fill="#fff"/></svg>
-<foreignObject x="${PAD}" y="${PAD + SAW}" width="${W}" height="${H}"><style xmlns="http://www.w3.org/1999/xhtml">${css}</style>${body}</foreignObject>
-<svg x="${PAD}" y="${PAD + SAW + H}" width="${W}" height="${SAW}" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="${sawBottom}" fill="#fff"/></svg>
+<svg x="${PAD}" y="${PAD}" width="${BW}" height="${SAW}" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="${sawTop}" fill="#fff"/></svg>
+<foreignObject x="${PAD}" y="${PAD + SAW}" width="${BW}" height="${BH}"><style xmlns="http://www.w3.org/1999/xhtml">${css}</style>${body}</foreignObject>
+<svg x="${PAD}" y="${PAD + SAW + BH}" width="${BW}" height="${SAW}" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="${sawBottom}" fill="#fff"/></svg>
 </svg>`;
 
         const img = new Image();
