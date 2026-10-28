@@ -1032,8 +1032,6 @@ body.dark-theme #previousHistorySection .dashboard-card strong { color: #fff !im
         <h2>Input Pembukuan</h2>
         <form id="laundryForm">
             <div class="form-grid">
-                <div class="form-group"><label>Tanggal</label><input type="text" id="tanggal" readonly></div>
-                <div class="form-group"><label>Jam</label><input type="text" id="waktu" readonly></div>
                 <div class="form-group"><label>Nama Customer</label><input type="text" id="nama" placeholder="Nama Customer" required></div>
                 <div class="form-group">
                     <label>Jenis Laundry</label>
@@ -1595,9 +1593,8 @@ function checkDailyCoin() {
 function updateDateTime() {
     const now = new Date();
     const months = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
-    document.getElementById("realtime").textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-    document.getElementById("tanggal").value = formatTanggal(now);
-    document.getElementById("waktu").value = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const days = ["MINGGU","SENIN","SELASA","RABU","KAMIS","JUMAT","SABTU"];
+    document.getElementById("realtime").textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     checkDailyCoin();
 }
 
@@ -1849,11 +1846,12 @@ form.addEventListener("submit", function(e) {
         kembalian = uangBayar - harga;
     }
 
+    const nowSave = new Date();
     const item = {
         id: Date.now(),
         noStruk: nextReceiptNo(),
-        tanggal: document.getElementById("tanggal").value,
-        waktu: document.getElementById("waktu").value,
+        tanggal: formatTanggal(nowSave),
+        waktu: `${pad(nowSave.getHours())}:${pad(nowSave.getMinutes())}:${pad(nowSave.getSeconds())}`,
         nama,
         jenis,
         plastik,
