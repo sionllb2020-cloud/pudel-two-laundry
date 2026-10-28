@@ -901,6 +901,10 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
 body.dark-theme #previousHistorySection .dashboard-card h3,
 body.dark-theme #previousHistorySection .dashboard-card strong { color: #fff !important; }
 
+/* Export & Upload Excel: di dalam Panel Edit Data, font lebih kecil */
+.bottom-actions .btn-excel,
+.bottom-actions .btn-upload { font-size: 10.5px !important; }
+
 /* Responsive HP */
 @media (max-width: 650px) {
     body { padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); }
@@ -1193,11 +1197,6 @@ body.dark-theme #previousHistorySection .dashboard-card strong { color: #fff !im
             <div class="print-total" id="previousPrintTotal">Total Pendapatan Riwayat: Rp 0</div>
         </section>
         <div class="print-total" id="printTotal">Pendapatan Hari Ini: Rp 0</div>
-        <div class="bottom-actions">
-            <button class="btn-excel" id="excelBtn" type="button">EXPORT EXCEL</button>
-            <label for="excelUpload" class="btn-upload" title="Upload Excel ke History">UPLOAD EXCEL</label>
-        </div>
-        <input type="file" id="excelUpload" accept=".xls" style="display:none;">
     </div>
 </div>
 
@@ -1294,6 +1293,16 @@ body.dark-theme #previousHistorySection .dashboard-card strong { color: #fff !im
                         <button type="button" class="btn-green" id="admEditSave" style="height:46px;">SIMPAN</button>
                     </div>
                 </div>
+            </div>
+
+            <div class="adm-section">
+                <h4>Export / Upload Excel</h4>
+                <p>Export mengambil seluruh data pembukuan (hari ini dan hari sebelumnya). Upload memasukkan semua data dari file hasil export.</p>
+                <div class="bottom-actions">
+                    <button class="btn-excel" id="excelBtn" type="button">EXPORT EXCEL</button>
+                    <label for="excelUpload" class="btn-upload" title="Upload Excel ke History">UPLOAD EXCEL</label>
+                </div>
+                <input type="file" id="excelUpload" accept=".xls" style="display:none;">
             </div>
 
             <div class="adm-section">
@@ -2513,9 +2522,9 @@ document.getElementById("excelBtn").addEventListener("click", function() {
     td { border: 1px solid #aaa; padding: 7px 5px; font-size: 10px; text-align: center; word-wrap: break-word; }
     .total-box { margin-top: 15px; border: 2px solid #222; padding: 12px 15px; text-align: right; font-size: 14px; font-weight: bold; }
     </style></head><body>
-    <h2>History Pembukuan Pudel Two Laundry Coin</h2>
+    <h2>History Pembukuan Pudel Two Laundry Coin (Hari Ini &amp; Hari Sebelumnya)</h2>
     <table><thead><tr>
-    <th>No</th><th>Tanggal</th><th>Waktu</th><th>Nama</th><th>Jenis</th><th>Plastik</th><th>Sabun</th><th>Pewangi</th><th>Harga</th><th>Bayar</th><th>Metode</th><th>Uang Bayar</th><th>Kembalian</th>
+    <th>No</th><th>Tanggal</th><th>Waktu</th><th>Nama</th><th>Jenis</th><th>Plastik</th><th>Sabun</th><th>Pewangi</th><th>Harga</th><th>Bayar</th><th>Metode</th><th>Uang Bayar</th><th>Kembalian</th><th>No. Struk</th><th>Koin</th>
     </tr></thead><tbody>`;
 
     let totalPendapatan = 0;
@@ -2536,6 +2545,8 @@ document.getElementById("excelBtn").addEventListener("click", function() {
         <td>${it.bayar === 'SUDAH' ? escapeHTML(it.metode) : '-'}</td>
         <td>${it.bayar === 'SUDAH' ? formatRupiah(pay.uang) : '-'}</td>
         <td>${it.bayar === 'SUDAH' ? formatRupiah(pay.kembali) : '-'}</td>
+        <td>${escapeHTML(it.noStruk || '')}</td>
+        <td>${Number(it.koin) || getDefaultCoins(it.jenis)}</td>
         </tr>`;
     });
     html += `</tbody></table><div class="total-box">Total Pendapatan: ${formatRupiah(totalPendapatan)}</div></body></html>`;
@@ -2571,7 +2582,7 @@ document.getElementById("excelUpload").addEventListener("change", function(e) {
                 const wkt = cells[2]?.textContent?.trim() || '';
                 const nm = cells[3]?.textContent?.trim() || '';
                 const jns = cells[4]?.textContent?.trim() || 'CB';
-                let plt = 0, sbn = 0, pwg = 0, hrg = 0, byrRaw = '', mtdRaw = '', uang = 0;
+                let plt = 0, sbn = 0, pwg = 0, hrg = 0, byrRaw = '', mtdRaw = '', uang = 0, noS = 0, koinX = 0;
 
                 if (cells.length >= 11) {
                     plt = parseHarga(cells[5]?.textContent || '0');
@@ -2581,6 +2592,10 @@ document.getElementById("excelUpload").addEventListener("change", function(e) {
                     byrRaw = cells[9]?.textContent?.trim().toUpperCase() || '';
                     mtdRaw = cells[10]?.textContent?.trim().toUpperCase() || '';
                     if (cells.length >= 13) uang = parseHarga(cells[11]?.textContent || '0');
+                    if (cells.length >= 15) {
+                        noS = parseHarga(cells[13]?.textContent || '0');
+                        koinX = parseHarga(cells[14]?.textContent || '0');
+                    }
                 } else {
                     sbn = parseHarga(cells[5]?.textContent || '0');
                     pwg = parseHarga(cells[6]?.textContent || '0');
@@ -2596,8 +2611,10 @@ document.getElementById("excelUpload").addEventListener("change", function(e) {
                     uangBayar = uang >= harga && uang > 0 ? uang : harga;
                     kembalian = uangBayar - harga;
                 }
+                if (!tgl || !nm) return;
                 imported.push({
                     id: Date.now() + idx,
+                    noStruk: noS || undefined,
                     tanggal: tgl,
                     waktu: wkt,
                     nama: nm,
@@ -2605,7 +2622,7 @@ document.getElementById("excelUpload").addEventListener("change", function(e) {
                     plastik: plt,
                     sabun: sbn,
                     pewangi: pwg,
-                    koin: getDefaultCoins(jns),
+                    koin: koinX || getDefaultCoins(jns),
                     bayar: isSudah ? 'SUDAH' : 'BELUM',
                     metode: isSudah ? (mtdRaw.includes('QRIS') ? 'QRIS' : 'CASH') : '',
                     harga: harga,
@@ -2614,11 +2631,29 @@ document.getElementById("excelUpload").addEventListener("change", function(e) {
                 });
             });
 
-            data = [...imported, ...data];
+            // Lewati data yang sudah ada (sama persis) agar tidak dobel saat upload ulang
+            const keyOf = x => [x.tanggal, x.waktu, String(x.nama).toLowerCase(), x.jenis, x.harga, x.bayar, x.noStruk || ""].join("|");
+            const seen = new Set(data.map(keyOf));
+            const fresh = imported.filter(x => {
+                const k = keyOf(x);
+                if (seen.has(k)) return false;
+                seen.add(k);
+                return true;
+            });
+            if (fresh.length === 0) return alert("Semua data di file ini sudah ada, tidak ada data baru yang ditambahkan.");
+
+            data = [...fresh, ...data];
             ensureReceiptNumbers();
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            // Koin hari ini ikut bertambah dari data hari ini yang baru masuk
+            checkDailyCoin();
+            const todayStr = formatTanggal(new Date());
+            fresh.forEach(x => { if (x.tanggal === todayStr) dailyCoin.count += Number(x.koin) || 0; });
+            saveCoin();
+            refreshCoinUI();
             renderTable();
-            alert(`Berhasil mengimpor ${imported.length} data pembukuan dari Excel.`);
+            const skipped = imported.length - fresh.length;
+            alert(`Berhasil mengimpor ${fresh.length} data pembukuan dari Excel.` + (skipped ? ` (${skipped} data dilewati karena sudah ada)` : ""));
         } catch(err) {
             alert("Gagal membaca file Excel. Pastikan file berformat .xls hasil export sistem.");
         }
