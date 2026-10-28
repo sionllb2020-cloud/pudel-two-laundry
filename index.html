@@ -2559,7 +2559,77 @@ function canvasToBlob(canvas) {
     });
 }
 
+// Foto struk IDENTIK dengan struk di sistem: struk yang tampil di layar (HTML + CSS yang sama)
+// digambar apa adanya ke gambar PNG, lengkap dengan tepi bergerigi kertas.
+function receiptExactBlob() {
+    return new Promise((resolve, reject) => {
+        const node = document.getElementById("thermalReceiptContent");
+        if (!node) return reject(new Error("struk tidak ada"));
+        const rect = node.getBoundingClientRect();
+        const W = Math.ceil(rect.width) || 220;
+        const H = Math.ceil(rect.height);
+        if (!H) return reject(new Error("struk belum tampil"));
+
+        // Kumpulkan CSS struk dari halaman
+        let css = "";
+        for (const sheet of Array.from(document.styleSheets)) {
+            let rules;
+            try { rules = sheet.cssRules; } catch (e) { continue; }
+            for (const r of Array.from(rules || [])) {
+                if (r.selectorText && /thermal-receipt|receipt-stamp|stamp-ico/.test(r.selectorText) && !/dark-theme/.test(r.selectorText)) {
+                    css += r.cssText + "\n";
+                }
+            }
+        }
+
+        const clone = node.cloneNode(true);
+        clone.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+        clone.style.margin = "0";
+        const body = new XMLSerializer().serializeToString(clone);
+
+        const PAD = 16, SAW = 8, S = 2;
+        const TW = W + PAD * 2, TH = H + SAW * 2 + PAD * 2;
+        const sawTop = "M0 8 L5 0 L10 8 L15 0 L20 8 L25 0 L30 8 L35 0 L40 8 L45 0 L50 8 L55 0 L60 8 L65 0 L70 8 L75 0 L80 8 L85 0 L90 8 L95 0 L100 8 Z";
+        const sawBottom = "M0 0 L5 8 L10 0 L15 8 L20 0 L25 8 L30 0 L35 8 L40 0 L45 8 L50 0 L55 8 L60 0 L65 8 L70 0 L75 8 L80 0 L85 8 L90 0 L95 8 L100 0 Z";
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${TW}" height="${TH}" viewBox="0 0 ${TW} ${TH}">
+<rect width="100%" height="100%" fill="#e2e8f0"/>
+<svg x="${PAD}" y="${PAD}" width="${W}" height="${SAW}" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="${sawTop}" fill="#fff"/></svg>
+<foreignObject x="${PAD}" y="${PAD + SAW}" width="${W}" height="${H}"><style xmlns="http://www.w3.org/1999/xhtml">${css}</style>${body}</foreignObject>
+<svg x="${PAD}" y="${PAD + SAW + H}" width="${W}" height="${SAW}" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="${sawBottom}" fill="#fff"/></svg>
+</svg>`;
+
+        const img = new Image();
+        img.onload = () => {
+            // jeda singkat agar gambar di dalam struk (logo) selesai digambar
+            setTimeout(() => {
+                try {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = TW * S;
+                    canvas.height = TH * S;
+                    const ctx = canvas.getContext("2d");
+                    ctx.fillStyle = "#e2e8f0";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvasToBlob(canvas).then(resolve, reject);
+                } catch (e) { reject(e); }
+            }, 120);
+        };
+        img.onerror = () => reject(new Error("gagal membuat gambar struk"));
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    });
+}
+
 async function receiptToBlob(it) {
+    // Utama: gambar dari tampilan struk di sistem (identik). Cadangan: gambar manual.
+    try {
+        if (currentActiveReceipt && currentActiveReceipt.id === it.id) {
+            return await receiptExactBlob();
+        }
+    } catch (e) { /* lanjut ke cadangan */ }
+    return await receiptToBlobFallback(it);
+}
+
+async function receiptToBlobFallback(it) {
     const logo = await loadLogoImage();
     try {
         return await canvasToBlob(drawReceiptCanvas(it, logo));
@@ -2665,7 +2735,27 @@ window.sendReceiptWA = async function() {
     btn.textContent = "Menyiapkan...";
 
     try {
-        // Foto struk (sama persis dengan struk di sistem) disalin ke clipboard, TANPA download
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const safeName = String(it.nama || "customer").replace(/[^\w]+/g, "_");
+        const fileName = `Struk_${safeName}_${it.noStruk || String(it.id).slice(-6)}.png`;
+
+        // HP: foto struk langsung muncul di WhatsApp, siap kirim (tanpa salin/tempel, tanpa download)
+        if (isMobile && navigator.canShare && navigator.share) {
+            let blob = null;
+            try { blob = await receiptToBlob(it); } catch (err) { blob = null; }
+            if (!blob) { alert("Gagal membuat foto struk."); return; }
+            const file = new File([blob], fileName, { type: "image/png" });
+            if (navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file], title: "Struk " + storeInfo.name });
+                    return;
+                } catch (err) {
+                    if (err && err.name === "AbortError") return;
+                }
+            }
+        }
+
+        // Komputer: foto struk disalin ke clipboard (tanpa download) lalu chat nomor tujuan dibuka
         const blobPromise = receiptToBlob(it);
         let copied = false;
         try {
@@ -2675,26 +2765,11 @@ window.sendReceiptWA = async function() {
             }
         } catch (err) { copied = false; }
 
-        let blob = null;
-        try { blob = await blobPromise; } catch (err) { blob = null; }
-        if (!blob) { alert("Gagal membuat foto struk."); return; }
-
-        // Clipboard tidak didukung: bagikan foto lewat menu bagikan HP (pilih WhatsApp)
         if (!copied) {
-            const safeName = String(it.nama || "customer").replace(/[^\w]+/g, "_");
-            const file = new File([blob], `Struk_${safeName}_${it.noStruk || String(it.id).slice(-6)}.png`, { type: "image/png" });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({ files: [file], title: "Struk " + storeInfo.name });
-                    return;
-                } catch (err) {
-                    if (err && err.name === "AbortError") return;
-                }
-            }
             // Cadangan terakhir: kirim sebagai teks struk
             const textUrl = `https://api.whatsapp.com/send?${phone ? "phone=" + phone + "&" : ""}text=${encodeURIComponent(buildReceiptWaText(it))}`;
             window.open(textUrl, "_blank");
-            showToast("Browser tidak bisa menyalin foto, struk dikirim sebagai teks.", 5000);
+            showToast("Browser tidak bisa menyiapkan foto, struk dikirim sebagai teks.", 5000);
             return;
         }
 
@@ -2712,7 +2787,7 @@ window.sendReceiptWA = async function() {
             if (!leftPage) window.open(webUrl, "_blank");
         }, 1800);
 
-        showToast("Foto struk sudah disalin. Di chat WhatsApp" + (phone ? " (+" + phone + ")" : "") + " tempel (Ctrl+V / tahan lalu Tempel), lalu tekan Kirim.", 8000);
+        showToast("Foto struk siap. Di chat WhatsApp" + (phone ? " (+" + phone + ")" : "") + " tekan Ctrl+V lalu Kirim.", 8000);
     } finally {
         btn.disabled = false;
         btn.textContent = oldText;
