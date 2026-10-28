@@ -298,7 +298,7 @@ button:active {
 }
 .btn-save { background: #1E88E5; color: white; width: 70%; justify-self: center; grid-column: 1 / -1; }
 @media (max-width: 600px) { .btn-save { width: 100%; } }
-/* Riwayat tanggal sebelumnya hanya tampil saat tabel diperbesar */
+/* Riwayat tanggal sebelumnya tetap terlihat agar struk dapat dibuka/cetak langsung dari bagian riwayat */
 #previousHistorySection { display: none; margin-top: 24px; }
 #historyCard:fullscreen #previousHistorySection,
 #historyCard:-webkit-full-screen #previousHistorySection { display: block; }
@@ -744,6 +744,22 @@ body.dark-theme .status-pop-card p { color: #EAF2F6; }
     margin-bottom: 10px;
 }
 .modal-input:focus { border-color: #1E88E5; box-shadow: 0 0 0 3px rgba(25,118,210,.12); }
+.code-input-wrap { position: relative; width: 100%; margin-bottom: 10px; }
+.code-input-wrap .modal-input { margin-bottom: 0; padding-right: 48px; }
+.code-visibility-toggle { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: #486579; cursor: pointer; font-size: 19px; line-height: 1; padding: 0; }
+/* Ikon mata/silang tetap pada posisi yang sama saat kursor diarahkan atau diklik. */
+.code-visibility-toggle,
+.code-visibility-toggle:hover,
+.code-visibility-toggle:active,
+.code-visibility-toggle:focus {
+    transform: translateY(-50%) !important;
+    top: 50% !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+}
+.code-visibility-toggle:hover { background: rgba(100,116,139,.12); }
+.code-input-wrap .modal-input:focus + .code-visibility-toggle { color: #1E88E5; }
 .modal-error { min-height: 18px; color: #dc2626; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
 .modal-actions { display: flex; gap: 8px; }
 .modal-actions button { flex: 1; }
@@ -879,6 +895,9 @@ body.dark-theme .table-wrapper::-webkit-scrollbar-track { background: #17242E; }
 body.dark-theme .table-wrapper::-webkit-scrollbar-thumb { background: #46616E; }
 body.dark-theme .empty { color: #9FB3BF; }
 /* Layar penuh tabel: tetap gelap di tema malam */
+#historyCard:fullscreen .dashboard-main-print-button,
+#historyCard:-webkit-full-screen .dashboard-main-print-button,
+#historyCard.fs-fallback .dashboard-main-print-button { display: none !important; }
 #historyCard:fullscreen { overflow: auto; margin: 0; border-radius: 0; padding: 18px; background: #fff; }
 #historyCard:-webkit-full-screen { overflow: auto; margin: 0; border-radius: 0; padding: 18px; background: #fff; }
 body.dark-theme #historyCard:fullscreen { background: #17242E; color: #EAF2F6; }
@@ -915,9 +934,23 @@ body.dark-theme .adm-form-grid input[readonly] { background: #1C2B35; color: #7F
 body.dark-theme #previousHistorySection .dashboard-card h3,
 body.dark-theme #previousHistorySection .dashboard-card strong { color: #fff !important; }
 
-/* Export & Upload Excel: di dalam Panel Edit Data, font lebih kecil */
+/* Export dan Upload Excel di Panel Edit Data: ukuran dan font seragam */
 .bottom-actions .btn-excel,
-.bottom-actions .btn-upload { font-size: 10.5px !important; }
+.bottom-actions .btn-upload {
+    box-sizing: border-box;
+    height: 45px;
+    min-height: 45px;
+    padding: 0 22px;
+    font-family: inherit;
+    font-size: 13px !important;
+    font-weight: 800;
+    letter-spacing: .1px;
+    line-height: 1.2;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 
 /* Responsive HP */
 @media (max-width: 650px) {
@@ -1128,13 +1161,13 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                 <h3>Total Transaksi</h3>
                 <strong id="totalTransaksi">0</strong>
             </div>
-            <div class="dashboard-card teal">
-                <h3>Koin Hari Ini</h3>
-                <strong id="totalCoinToday">0 Coin</strong>
-            </div>    
             <div class="dashboard-card orange">
                 <h3>CASH / QRIS (TRANSAKSI)</h3>
                 <strong id="totalMetode">0 / 0</strong>
+            </div>
+            <div class="dashboard-card teal">
+                <h3>Koin Hari Ini</h3>
+                <strong id="totalCoinToday">0 Coin</strong>
             </div>
             <div class="dashboard-card dark">
                 <h3>CASH / QRIS </h3>
@@ -1167,13 +1200,13 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                 <h3>Total Transaksi</h3>
                 <strong id="tdTotal">0</strong>
             </div>
-            <div class="dashboard-card teal">
-                <h3 id="tdCoinLabel">Koin Hari Ini</h3>
-                <strong id="tdCoin">0 Koin</strong>
-            </div>
             <div class="dashboard-card orange">
                 <h3>CASH / QRIS (TRANSAKSI)</h3>
                 <strong id="tdMetode">0 / 0</strong>
+            </div>
+            <div class="dashboard-card teal">
+                <h3 id="tdCoinLabel">Koin Hari Ini</h3>
+                <strong id="tdCoin">0 Koin</strong>
             </div>
             <div class="dashboard-card dark">
                 <h3>CASH / QRIS (RP)</h3>
@@ -1207,6 +1240,9 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
+        <div class="dashboard-main-print-button" style="display:flex;justify-content:center;align-items:center;width:100%;margin:14px auto 18px;">
+            <button type="button" id="printTodayReceiptsButton" onclick="printAllReceipts(false, 'today')" style="background:#2563eb;color:#fff;border:0;border-radius:7px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;min-height:40px;max-width:100%;">LIHAT STRUK HARI INI</button>
+        </div>
         <section id="previousHistorySection" aria-label="Riwayat pembukuan hari sebelumnya">
             <h3>Riwayat Pembukuan Hari Sebelumnya</h3>
         <div class="dashboard book-dashboard" id="pvDash">
@@ -1214,13 +1250,13 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                 <h3>Total Transaksi</h3>
                 <strong id="pvTotal">0</strong>
             </div>
-            <div class="dashboard-card teal">
-                <h3 id="pvCoinLabel">Koin (Semua Tanggal)</h3>
-                <strong id="pvCoin">0 Koin</strong>
-            </div>
             <div class="dashboard-card orange">
                 <h3>CASH / QRIS (TRANSAKSI)</h3>
                 <strong id="pvMetode">0 / 0</strong>
+            </div>
+            <div class="dashboard-card teal">
+                <h3 id="pvCoinLabel">Koin (Semua Tanggal)</h3>
+                <strong id="pvCoin">0 Koin</strong>
             </div>
             <div class="dashboard-card dark">
                 <h3>CASH / QRIS (RP)</h3>
@@ -1238,6 +1274,9 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                     </tr></thead>
                     <tbody id="previousHistoryBody"></tbody>
                 </table>
+            </div>
+            <div style="display:flex;justify-content:center;align-items:center;width:100%;margin:14px auto 12px;">
+                <button type="button" id="printPreviousReceiptsButton" onclick="printAllReceipts(false, 'previous')" style="background:#2563eb;color:#fff;border:0;border-radius:7px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;min-height:40px;max-width:100%;">LIHAT STRUK RIWAYAT TERPILIH</button>
             </div>
             <div class="print-total" id="previousPrintTotal">Total Pendapatan Riwayat: Rp 0</div>
         </section>
@@ -1259,7 +1298,10 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
         </div>
         <form id="accessForm" class="modal-body" autocomplete="off">
             <label class="lbl" for="accessInput">Kode Akses</label>
-            <input type="password" id="accessInput" class="modal-input" placeholder="Masukkan kode akses" autocomplete="off">
+            <div class="code-input-wrap">
+                <input type="password" id="accessInput" class="modal-input" placeholder="Masukkan kode akses" autocomplete="off" inputmode="numeric" pattern="[0-9]*" maxlength="20">
+                <button type="button" class="code-visibility-toggle" data-toggle-code="accessInput" aria-label="Lihat kode akses" title="Lihat kode akses">👁</button>
+            </div>
             <div class="modal-error" id="accessError"></div>
             <div class="modal-actions">
                 <button type="button" class="btn-gray" id="accessCancelBtn">Batal</button>
@@ -1301,8 +1343,8 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                 <div id="admEditBox" class="adm-editbox" style="display:none;">
                     <h4>Form Edit Data</h4>
                     <div class="adm-form-grid">
-                        <div><label>Tanggal</label><input type="date" id="edTanggal"></div>
-                        <div><label>Jam</label><input type="time" step="1" id="edWaktu"></div>
+                        <div><label>Tanggal</label><input type="date" id="edTanggal" readonly tabindex="-1" aria-readonly="true" style="pointer-events:none;cursor:not-allowed;opacity:1;"></div>
+                        <div><label>Jam</label><input type="time" step="1" id="edWaktu" readonly tabindex="-1" aria-readonly="true" style="pointer-events:none;cursor:not-allowed;opacity:1;"></div>
                         <div><label>Nama Customer</label><input type="text" id="edNama"></div>
                         <div><label>Jenis Laundry</label>
                             <select id="edJenis">
@@ -1352,8 +1394,14 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
 
             <div class="adm-section">
                 <h4>Ubah Kode Akses</h4>
-                <input type="password" id="newCode" class="modal-input" placeholder="Kode akses baru (min. 4 karakter)" autocomplete="new-password" style="height:40px; font-size:14px;">
-                <input type="password" id="newCode2" class="modal-input" placeholder="Ulangi kode akses baru" autocomplete="new-password" style="height:40px; font-size:14px;">
+                <div class="code-input-wrap">
+                    <input type="password" id="newCode" class="modal-input" placeholder="Kode akses baru (min. 4 angka)" autocomplete="new-password" inputmode="numeric" pattern="[0-9]*" maxlength="20" style="height:40px; font-size:14px;">
+                    <button type="button" class="code-visibility-toggle" data-toggle-code="newCode" aria-label="Lihat kode akses" title="Lihat kode akses">👁</button>
+                </div>
+                <div class="code-input-wrap">
+                    <input type="password" id="newCode2" class="modal-input" placeholder="Ulangi kode akses baru" autocomplete="new-password" inputmode="numeric" pattern="[0-9]*" maxlength="20" style="height:40px; font-size:14px;">
+                    <button type="button" class="code-visibility-toggle" data-toggle-code="newCode2" aria-label="Lihat kode akses" title="Lihat kode akses">👁</button>
+                </div>
                 <button type="button" class="btn-green" id="admSaveCode" style="width:100%; height:40px;">Simpan Kode Baru</button>
             </div>
 
@@ -1796,6 +1844,33 @@ document.getElementById("admSaveCode").addEventListener("click", () => requireAd
     document.getElementById("newCode2").value = "";
     alert("Kode akses berhasil diubah. Ingat kode baru Anda.");
 }));
+
+// Kode akses hanya menerima angka. Ikon mata menampilkan kode, ikon silang menyamarkannya kembali.
+document.querySelectorAll("#accessInput, #newCode, #newCode2").forEach((input) => {
+    input.setAttribute("inputmode", "numeric");
+    input.setAttribute("pattern", "[0-9]*");
+    input.addEventListener("input", () => { input.value = input.value.replace(/[^0-9]/g, "").slice(0, 20); });
+    input.addEventListener("paste", (event) => {
+        event.preventDefault();
+        const pasted = (event.clipboardData || window.clipboardData).getData("text").replace(/[^0-9]/g, "");
+        const start = input.selectionStart ?? input.value.length;
+        const end = input.selectionEnd ?? input.value.length;
+        input.value = (input.value.slice(0, start) + pasted + input.value.slice(end)).slice(0, 20);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+});
+document.querySelectorAll("[data-toggle-code]").forEach((button) => {
+    button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.toggleCode);
+        if (!input) return;
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        button.textContent = showing ? "👁" : "×";
+        button.setAttribute("aria-label", showing ? "Lihat kode akses" : "Samarkan kode akses");
+        button.title = showing ? "Lihat kode akses" : "Samarkan kode akses";
+        input.focus();
+    });
+});
 
 document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
@@ -2243,6 +2318,9 @@ window.del = function(id) {
         applyCoinDelta(it.tanggal, -(it.koin || getDefaultCoins(it.jenis)));
         data = data.filter(x => x.id !== id);
         if (editingId === id) { editingId = null; hideEditBox(); }
+        // Semua data terhapus: nomor struk berikutnya kembali ke 1. Jika data masih ada, lanjut dari nomor terbesar yang tersisa.
+        const remainingMaxReceiptNo = data.reduce((max, row) => Math.max(max, Number(row.noStruk) || 0), 0);
+        localStorage.setItem(STORAGE_RECEIPT_NO, String(remainingMaxReceiptNo));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         renderAdminList();
         renderTable();
@@ -2285,7 +2363,7 @@ window.openReceiptModal = function(id) {
         <div class="thermal-receipt-divider"></div>
         <div class="thermal-receipt-row">
             <span>Status</span>
-            <span class="receipt-stamp ${lunas?'':'belum'}">${stampIcon(lunas)}${lunas?'LUNAS':'BELUM'}</span>
+            <span class="receipt-stamp ${lunas?'':'belum'}">${lunas?'LUNAS':'BELUM'}</span>
         </div>
         ${lunas?`<div class="thermal-receipt-row"><span>Metode</span><span style="font-weight:bold;">${escapeHTML(it.metode)}</span></div>`:''}
         <div class="thermal-receipt-divider-double"></div>
@@ -2317,6 +2395,190 @@ window.openReceiptModal = function(id) {
 
 window.closeReceiptModal = function() {
     document.getElementById("receiptModal").style.display = "none";
+};
+
+let activeBulkReceiptScope = "today";
+function getBulkReceiptRows(scope) {
+    const today = formatTanggal(new Date());
+    const search = (document.getElementById("search")?.value || "").toLowerCase().trim();
+    const selectedDate = document.getElementById("dateFilter")?.value || "";
+    const dateToIso = value => { const p = String(value || "").split("/"); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : ""; };
+    let rows = data.filter(it => it.bayar === "SUDAH");
+    if (scope === "today") {
+        rows = rows.filter(it => it.tanggal === today);
+    } else {
+        rows = rows.filter(it => it.tanggal !== today);
+        if (selectedDate) rows = rows.filter(it => dateToIso(it.tanggal) === selectedDate);
+        if (search) rows = rows.filter(it => String(it.nama || "").toLowerCase().includes(search) || String(it.jenis || "").toLowerCase().includes(search) || getJenisLaundryFullName(it.jenis).toLowerCase().includes(search) || String(it.tanggal || "").toLowerCase().includes(search));
+    }
+    return rows.slice().sort((a, b) => (Number(a.noStruk) || 0) - (Number(b.noStruk) || 0) || String(a.tanggal || "").localeCompare(String(b.tanggal || "")));
+}
+
+window.sendAllReceiptsWA = function() {
+    // Kirim struk lunas sesuai cakupan tombol yang sedang dipakai.
+    const receipts = getBulkReceiptRows(activeBulkReceiptScope);
+
+    if (!receipts.length) {
+        alert("Belum ada struk lunas yang bisa dikirim.");
+        return;
+    }
+
+    const rawPhone = prompt("Masukkan nomor WhatsApp tujuan (opsional). Contoh: 081234567890.\nKosongkan jika ingin memilih kontak di WhatsApp:", "");
+    if (rawPhone === null) return;
+    const phone = normalizeWaPhone(rawPhone);
+    if (rawPhone.trim() && phone.length < 9) {
+        alert("Nomor WhatsApp tidak valid. Periksa kembali nomornya.");
+        return;
+    }
+
+    const message = receipts.map((it, index) => {
+        const receiptText = buildReceiptWaText(it).replace(/^```\n?/, "").replace(/\n?```$/, "");
+        return `STRUK ${index + 1} DARI ${receipts.length}\n${receiptText}`;
+    }).join("\n\n\n");
+
+    if (message.length > 55000) {
+        alert("Jumlah struk terlalu banyak untuk dikirim dalam satu pesan WhatsApp. Silakan pilih dan kirim struk satu per satu agar pesan tidak terpotong.");
+        return;
+    }
+
+    const url = `https://api.whatsapp.com/send?${phone ? "phone=" + phone + "&" : ""}text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+};
+
+window.printAllReceipts = function(doPrint = false, scope = null) {
+    // Pratinjau dan cetak menggunakan cakupan yang sama: hari ini atau riwayat terpilih.
+    if (scope) activeBulkReceiptScope = scope;
+    const receipts = getBulkReceiptRows(activeBulkReceiptScope);
+
+    if (!receipts.length) {
+        alert(activeBulkReceiptScope === "today"
+            ? "Belum ada struk lunas untuk hari ini."
+            : "Tidak ada struk lunas yang cocok dengan tanggal atau nama yang dipilih.");
+        return;
+    }
+
+    const receiptMarkup = receipts.map((it, index) => {
+        const fullJenis = getJenisLaundryFullName(it.jenis);
+        const pay = getPayInfo(it);
+        const content = `
+            <div class="thermal-receipt-center">
+                <img src="${RECEIPT_LOGO_SRC}" class="thermal-receipt-logo" alt="Logo" onerror="this.style.display='none'" />
+                <div class="thermal-receipt-title">${escapeHTML(storeInfo.name)}</div>
+                <div class="thermal-receipt-sub" style="font-weight:bold;">${escapeHTML(storeInfo.tagline)}</div>
+                <div class="thermal-receipt-sub">${escapeHTML(storeInfo.address)}</div>
+                <div class="thermal-receipt-sub">Telp/WA: ${escapeHTML(storeInfo.phone)}</div>
+            </div>
+            <div class="thermal-receipt-divider"></div>
+            <div class="thermal-receipt-row"><span>No. Struk</span><span style="font-weight:bold;">${receiptNo(it)}</span></div>
+            <div class="thermal-receipt-row"><span>Tanggal</span><span>${escapeHTML(it.tanggal)}</span></div>
+            <div class="thermal-receipt-row"><span>Waktu</span><span>${escapeHTML(it.waktu)}</span></div>
+            <div class="thermal-receipt-row"><span>Customer</span><span style="font-weight:bold;">${escapeHTML(it.nama)}</span></div>
+            <div class="thermal-receipt-divider"></div>
+            <div class="thermal-receipt-row" style="font-weight:bold;"><span>LAYANAN</span></div>
+            <div style="font-size:10.5px;font-weight:bold;margin-bottom:2px;">${fullJenis}</div>
+            ${Number(it.plastik) > 0 ? `<div class="thermal-receipt-row"><span>• Plastik</span><span>${it.plastik} Pcs</span></div>` : ''}
+            ${Number(it.sabun) > 0 ? `<div class="thermal-receipt-row"><span>• Sabun Cuci</span><span>${it.sabun} Sachet</span></div>` : ''}
+            ${Number(it.pewangi) > 0 ? `<div class="thermal-receipt-row"><span>• Pewangi</span><span>${it.pewangi} Sachet</span></div>` : ''}
+            <div class="thermal-receipt-divider"></div>
+            <div class="thermal-receipt-row"><span>Status</span><span class="receipt-stamp">LUNAS</span></div>
+            <div class="thermal-receipt-row"><span>Metode</span><span style="font-weight:bold;">${escapeHTML(it.metode)}</span></div>
+            <div class="thermal-receipt-divider-double"></div>
+            <div class="thermal-receipt-row thermal-receipt-total"><span>TOTAL</span><span>${formatRupiah(it.harga)}</span></div>
+            <div class="thermal-receipt-divider-double"></div>
+            <div class="thermal-receipt-row"><span>Uang Bayar</span><span style="font-weight:bold;">${formatRupiah(pay.uang)}</span></div>
+            <div class="thermal-receipt-row"><span>Kembalian</span><span style="font-weight:bold;">${formatRupiah(pay.kembali)}</span></div>
+            <div class="thermal-receipt-divider-double"></div>
+            <div class="thermal-receipt-center" style="font-size:9.5px;margin-top:4px;">
+                <p style="font-weight:bold;margin:0;">TERIMA KASIH BANYAK</p>
+                <p style="margin:2px 0 0 0;">${escapeHTML(storeInfo.footer)}</p>
+                <p style="font-weight:bold;margin:3px 0 0 0;">*** ${escapeHTML(storeInfo.name)} ***</p>
+            </div>`;
+        return `<section class="bulk-receipt">${content}</section>`;
+    }).join("");
+
+    // Tampilkan semua struk sebagai daftar yang bisa di-scroll, terutama di layar HP.
+    if (!doPrint) {
+        let preview = document.getElementById("allReceiptsPreviewModal");
+        if (!preview) {
+            preview = document.createElement("div");
+            preview.id = "allReceiptsPreviewModal";
+            preview.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:10px;";
+            document.body.appendChild(preview);
+        }
+        preview.innerHTML = `
+          <div style="background:#fff;color:#111;width:min(100%,560px);height:min(92dvh,900px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.3);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid #ddd;flex-shrink:0;">
+              <strong style="font-size:15px;">${activeBulkReceiptScope === "today" ? "Struk Hari Ini" : "Struk Riwayat Terpilih"} (${receipts.length})</strong>
+              <button type="button" onclick="document.getElementById('allReceiptsPreviewModal').remove()" aria-label="Tutup" style="border:0;border-radius:7px;background:#e5e7eb;color:#111;padding:8px 12px;font-weight:700;cursor:pointer;">Tutup ×</button>
+            </div>
+            <div id="allReceiptsPreviewList" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;background:#f3f4f6;">
+              <style>
+                #allReceiptsPreviewList .bulk-receipt{width:100%;max-width:340px;margin:0 auto 14px;background:#fff;padding:12px 14px 18px;box-shadow:0 1px 5px rgba(0,0,0,.14);font-family:'Courier New',monospace;font-size:11px;line-height:1.35;color:#000;overflow-wrap:anywhere;}
+                #allReceiptsPreviewList .thermal-receipt-center{text-align:center;color:#000;}
+                #allReceiptsPreviewList .thermal-receipt-logo{width:80px;height:auto;max-width:100%;margin:0 auto 4px;display:block;object-fit:contain;}
+                #allReceiptsPreviewList .thermal-receipt-title{font-size:13.5px;font-weight:900;}
+                #allReceiptsPreviewList .thermal-receipt-sub{font-size:9.5px;}
+                #allReceiptsPreviewList .thermal-receipt-divider{border-top:1px dashed #000;margin:5px 0;}
+                #allReceiptsPreviewList .thermal-receipt-divider-double{border-top:2px solid #000;margin:5px 0;}
+                #allReceiptsPreviewList .thermal-receipt-row{display:flex;justify-content:space-between;gap:5px;font-size:10.5px;margin-bottom:2px;color:#000;}
+                #allReceiptsPreviewList .thermal-receipt-row span:last-child{text-align:right;}
+                #allReceiptsPreviewList .thermal-receipt-total{font-size:13px;font-weight:900;}
+                #allReceiptsPreviewList .receipt-stamp{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;line-height:1.2;padding:1px 7px;font-size:10.5px;font-weight:900;border:1.5px dashed #000;border-radius:4px;}
+              </style>
+              ${receiptMarkup}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px solid #ddd;flex-shrink:0;">
+              <button type="button" onclick="document.getElementById('allReceiptsPreviewModal').remove()" style="flex:1 1 70px;background:#6b7280;color:#fff;border:0;border-radius:8px;padding:11px 8px;font-weight:700;cursor:pointer;">Tutup</button>
+              <button type="button" onclick="printAllReceipts(true)" style="flex:1 1 100px;background:#2563eb;color:#fff;border:0;border-radius:8px;padding:11px 8px;font-weight:700;cursor:pointer;">Cetak Semua</button>
+              <button type="button" onclick="sendAllReceiptsWA()" style="flex:1 1 145px;background:#10b981;color:#fff;border:0;border-radius:8px;padding:11px 8px;font-weight:700;cursor:pointer;">Kirim Semua ke WhatsApp</button>
+            </div>
+          </div>`;
+        return;
+    }
+
+    let iframe = document.getElementById("allReceiptsPrintIframe");
+    if (!iframe) {
+        iframe = document.createElement("iframe");
+        iframe.id = "allReceiptsPrintIframe";
+        iframe.style.position = "fixed";
+        iframe.style.right = "0";
+        iframe.style.bottom = "0";
+        iframe.style.width = "0";
+        iframe.style.height = "0";
+        iframe.style.border = "0";
+        document.body.appendChild(iframe);
+    }
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Semua Struk</title>
+    <style>
+    @page { size: 58mm auto; margin: 0; }
+    * { box-sizing:border-box; color:#000 !important; font-family:'Courier New',monospace !important; }
+    body { width:58mm; max-width:58mm; margin:0 auto; padding:2mm 3mm 8mm 3mm; font-size:11px; line-height:1.35; color:#000; -webkit-print-color-adjust:exact; }
+    .bulk-receipt { width:100%; padding:0 0 5mm 0; page-break-after:always; break-after:page; }
+    .bulk-receipt:last-child { page-break-after:auto; break-after:auto; }
+    .thermal-receipt-center { text-align:center; }
+    .thermal-receipt-logo { width:80px; height:auto; max-width:100%; margin:0 auto 4px auto; display:block; object-fit:contain; }
+    .thermal-receipt-title { font-size:13.5px; font-weight:900; }
+    .thermal-receipt-sub { font-size:9.5px; }
+    .thermal-receipt-divider { border-top:1px dashed #000; margin:5px 0; }
+    .thermal-receipt-divider-double { border-top:2px solid #000; margin:5px 0; }
+    .thermal-receipt-row { display:flex; justify-content:space-between; gap:5px; font-size:10.5px; margin-bottom:2px; }
+    .thermal-receipt-row span:last-child { text-align:right; }
+    .thermal-receipt-total { font-size:13px; font-weight:900; }
+    .receipt-stamp { display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; line-height:1.2; padding:1px 7px; font-size:10.5px; font-weight:900; border:1.5px dashed #000; border-radius:4px; }
+    </style></head><body>${receiptMarkup}</body></html>`);
+    doc.close();
+
+    const imgs = Array.from(doc.images || []);
+    Promise.race([
+        Promise.all(imgs.map(im => im.complete ? Promise.resolve() : new Promise(resolve => { im.onload = im.onerror = resolve; }))),
+        new Promise(resolve => setTimeout(resolve, 1500))
+    ]).then(() => setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+    }, 200));
 };
 
 window.printReceiptIframe = function() {
@@ -2476,7 +2738,7 @@ function drawReceiptCanvas(it, logoImg) {
                 setF(sz, m.b);
                 const lw = ctx.measureText(m.l).width;
                 setF(sz, m.b || m.b2 || isStamp);
-                const rw = ctx.measureText(m.r).width + (isStamp ? 14 + 18 : 0);
+                const rw = ctx.measureText(m.r).width;
                 if (lw + rw + 10 <= CW) {
                     if (draw) {
                         setF(sz, m.b);
@@ -2490,28 +2752,7 @@ function drawReceiptCanvas(it, logoImg) {
                             ctx.strokeStyle = m.c;
                             ctx.strokeRect(bx, by, rw, bh);
                             ctx.restore();
-                            // ikon ceklis / silang digambar langsung agar selalu jelas
-                            const ix = bx + 8, cy = y + lh / 2 - 2;
-                            ctx.save();
-                            ctx.strokeStyle = m.c;
-                            ctx.lineWidth = 2.6;
-                            ctx.lineCap = "round";
-                            ctx.lineJoin = "round";
-                            ctx.setLineDash([]);
-                            ctx.beginPath();
-                            if (m.ok) {
-                                ctx.moveTo(ix, cy);
-                                ctx.lineTo(ix + 4, cy + 4.5);
-                                ctx.lineTo(ix + 11, cy - 4.5);
-                            } else {
-                                ctx.moveTo(ix + 1, cy - 4.5);
-                                ctx.lineTo(ix + 10, cy + 4.5);
-                                ctx.moveTo(ix + 10, cy - 4.5);
-                                ctx.lineTo(ix + 1, cy + 4.5);
-                            }
-                            ctx.stroke();
-                            ctx.restore();
-                            text(m.r, ix + 18, y, "left", m.c);
+                            text(m.r, PAD + CW - 5, y, "right", m.c);
                         } else {
                             text(m.r, PAD + CW, y, "right");
                         }
@@ -2716,7 +2957,7 @@ function buildReceiptWaText(it) {
     if (Number(it.sabun) > 0) L.push(...waRow("• Sabun Cuci", it.sabun + " Sachet"));
     if (Number(it.pewangi) > 0) L.push(...waRow("• Pewangi", it.pewangi + " Sachet"));
     L.push(dash);
-    L.push(...waRow("Status", lunas ? "✓ LUNAS" : "✖ BELUM"));
+    L.push(...waRow("Status", lunas ? "LUNAS" : "BELUM"));
     if (lunas) L.push(...waRow("Metode", it.metode || "-"));
     L.push(dbl);
     L.push(...waRow("TOTAL", formatRupiah(it.harga)));
