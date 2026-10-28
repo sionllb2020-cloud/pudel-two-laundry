@@ -1056,7 +1056,6 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
 
     <!-- NAVIGASI -->
     <nav class="main-nav" id="mainNav">
-        <button type="button" class="nav-btn" id="navHome">Beranda</button>
         <button type="button" class="nav-btn" id="navBook">Pembukuan</button>
         <button type="button" class="nav-btn nav-edit" id="navEdit">Edit Data</button>
         <button type="button" class="nav-btn nav-lock" id="navLock" style="display:none;">Kunci</button>
@@ -1750,7 +1749,6 @@ document.getElementById("accessForm").addEventListener("submit", function(e) {
 document.getElementById("accessCloseBtn").addEventListener("click", closeAccessModal);
 document.getElementById("accessCancelBtn").addEventListener("click", closeAccessModal);
 
-document.getElementById("navHome").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 document.getElementById("navBook").addEventListener("click", () => document.getElementById("historyCard").scrollIntoView({ behavior: "smooth", block: "start" }));
 document.getElementById("navEdit").addEventListener("click", () => requireAdmin(openAdminPanel));
 document.getElementById("navLock").addEventListener("click", lockAdmin);
@@ -2739,8 +2737,8 @@ window.sendReceiptWA = async function() {
         const safeName = String(it.nama || "customer").replace(/[^\w]+/g, "_");
         const fileName = `Struk_${safeName}_${it.noStruk || String(it.id).slice(-6)}.png`;
 
-        // HP: foto struk langsung muncul di WhatsApp, siap kirim (tanpa salin/tempel, tanpa download)
-        if (isMobile && navigator.canShare && navigator.share) {
+        // HP tanpa nomor diketik: foto struk langsung muncul di WhatsApp lewat menu bagikan, pilih kontak lalu Kirim
+        if (isMobile && !phone && navigator.canShare && navigator.share) {
             let blob = null;
             try { blob = await receiptToBlob(it); } catch (err) { blob = null; }
             if (!blob) { alert("Gagal membuat foto struk."); return; }
@@ -2755,7 +2753,7 @@ window.sendReceiptWA = async function() {
             }
         }
 
-        // Komputer: foto struk disalin ke clipboard (tanpa download) lalu chat nomor tujuan dibuka
+        // Nomor diketik (HP & komputer): foto struk disiapkan di clipboard (tanpa download) lalu chat nomor tujuan dibuka
         const blobPromise = receiptToBlob(it);
         let copied = false;
         try {
@@ -2787,7 +2785,7 @@ window.sendReceiptWA = async function() {
             if (!leftPage) window.open(webUrl, "_blank");
         }, 1800);
 
-        showToast("Foto struk siap. Di chat WhatsApp" + (phone ? " (+" + phone + ")" : "") + " tekan Ctrl+V lalu Kirim.", 8000);
+        showToast("Foto struk siap. Di chat WhatsApp" + (phone ? " (+" + phone + ")" : "") + (isMobile ? " tekan Tempel (tahan di kolom pesan / tombol Tempel di keyboard), lalu Kirim." : " tekan Ctrl+V lalu Kirim."), 8000);
     } finally {
         btn.disabled = false;
         btn.textContent = oldText;
