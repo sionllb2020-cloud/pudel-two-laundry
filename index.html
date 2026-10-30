@@ -1265,7 +1265,7 @@ body.dark-theme .calculator-grid .calc-equal { background: #2563eb; color: #fff;
             <button type="button" id="printTodayReceiptsButton" onclick="printAllReceipts(false, 'today')" style="background:#2563eb;color:#fff;border:0;border-radius:7px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;min-height:40px;max-width:100%;">LIHAT STRUK HARI INI</button>
         </div>
         <section id="previousHistorySection" aria-label="Riwayat pembukuan hari sebelumnya">
-            <h3>Riwayat Pembukuan Hari Sebelumnya</h3>
+            <h3>Riwayat Pembukuan Sebelum Hari Ini</h3>
         <div class="dashboard book-dashboard" id="pvDash">
             <div class="dashboard-card blue">
                 <h3>Total Transaksi</h3>
@@ -2106,7 +2106,7 @@ function renderTable() {
     if (d) previousRows = previousRows.filter(it => dateToIso(it.tanggal) === d);
 
     buildRows(tb, todayRows, "Belum ada pembukuan untuk hari ini.");
-    buildRows(oldTb, previousRows, "Belum ada riwayat pembukuan untuk tanggal sebelumnya.");
+    buildRows(oldTb, previousRows, "Belum ada riwayat pembukuan untuk tanggal sebelum hari ini.");
 
     let totalRp = 0, totalCash = 0, totalQris = 0, cCash = 0, cQris = 0;
     todayRows.forEach(it => {
