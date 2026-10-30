@@ -1608,7 +1608,7 @@ function getPayInfo(it) {
 // Saat tabel pembukuan layar penuh, hanya elemen di dalam layar penuh yang terlihat.
 // Maka modal struk, toast & status dipindahkan ke dalam elemen layar penuh agar
 // struk bisa langsung dibuka tanpa keluar dari layar penuh.
-const OVERLAY_IDS = ["receiptModal", "accessModal", "adminModal", "appToast", "statusPop"];
+const OVERLAY_IDS = ["receiptModal", "accessModal", "adminModal", "appToast", "statusPop", "allReceiptsPreviewModal"];
 function overlayHost() {
     return document.fullscreenElement || document.webkitFullscreenElement || document.body;
 }
@@ -2503,8 +2503,8 @@ window.printAllReceipts = function(doPrint = false, scope = null) {
             preview = document.createElement("div");
             preview.id = "allReceiptsPreviewModal";
             preview.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:10px;";
-            document.body.appendChild(preview);
         }
+        placeOverlay(preview);
         preview.innerHTML = `
           <div style="background:#fff;color:#111;width:min(100%,560px);height:min(92dvh,900px);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.3);">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid #ddd;flex-shrink:0;">
