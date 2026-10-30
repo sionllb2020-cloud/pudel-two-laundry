@@ -1124,9 +1124,10 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                         <option value="CKL">CKL (Cuci Kering Lipat - 2 Koin)</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Plastik (Opsional)</label><input type="number" id="plastik" min="0" placeholder="0 (Opsional)"></div>
-                <div class="form-group"><label>Sabun (Opsional)</label><input type="number" id="sabun" min="0" placeholder="0 (Opsional)"></div>
-                <div class="form-group"><label>Pewangi (Opsional)</label><input type="number" id="pewangi" min="0" placeholder="0 (Opsional)"></div>
+                <div class="form-group"><label>Plastik (Opsional)</label><input type="number" id="plastik" min="0" placeholder="Jumlah Plastik"><input type="text" id="hargaPlastik" inputmode="numeric" placeholder="Harga Plastik (Rp)" style="margin-top:6px;"></div>
+                <div class="form-group"><label>Sabun (Opsional)</label><input type="number" id="sabun" min="0" placeholder="Jumlah Sabun"><input type="text" id="hargaSabun" inputmode="numeric" placeholder="Harga Sabun (Rp)" style="margin-top:6px;"></div>
+                <div class="form-group"><label>Pewangi (Opsional)</label><input type="number" id="pewangi" min="0" placeholder="Jumlah Pewangi"><input type="text" id="hargaPewangi" inputmode="numeric" placeholder="Harga Pewangi (Rp)" style="margin-top:6px;"></div>
+                <div class="form-group"><label>Berat Laundry (KG)</label><input type="number" id="kg" min="0" step="0.01" placeholder="Contoh: 3.5"></div>
                 <div class="form-group">
                     <label>Bayar</label>
                     <select id="bayar" required>
@@ -1356,9 +1357,10 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                             </select>
                         </div>
                         <div><label>Koin (otomatis)</label><input type="text" id="edKoin" readonly></div>
-                        <div><label>Plastik</label><input type="number" min="0" id="edPlastik"></div>
-                        <div><label>Sabun</label><input type="number" min="0" id="edSabun"></div>
-                        <div><label>Pewangi</label><input type="number" min="0" id="edPewangi"></div>
+                        <div><label>Plastik</label><input type="number" min="0" id="edPlastik"><input type="text" id="edHargaPlastik" inputmode="numeric" placeholder="Harga Plastik (Rp)" style="margin-top:5px;"></div>
+                        <div><label>Sabun</label><input type="number" min="0" id="edSabun"><input type="text" id="edHargaSabun" inputmode="numeric" placeholder="Harga Sabun (Rp)" style="margin-top:5px;"></div>
+                        <div><label>Pewangi</label><input type="number" min="0" id="edPewangi"><input type="text" id="edHargaPewangi" inputmode="numeric" placeholder="Harga Pewangi (Rp)" style="margin-top:5px;"></div>
+                        <div><label>Berat Laundry (KG)</label><input type="number" min="0" step="0.01" id="edKg"></div>
                         <div><label>Bayar</label>
                             <select id="edBayar">
                                 <option value="SUDAH">Sudah</option>
@@ -1930,6 +1932,16 @@ bayarInput.addEventListener("change", function() {
     }
 });
 
+
+["hargaPlastik", "hargaSabun", "hargaPewangi", "edHargaPlastik", "edHargaSabun", "edHargaPewangi"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", function() {
+        const amount = parseHarga(this.value);
+        this.value = amount > 0 ? formatRupiah(amount) : "";
+    });
+});
+
 hargaInput.addEventListener("input", function() {
     if (this.disabled) return;
     const a = parseHarga(this.value);
@@ -1955,6 +1967,10 @@ form.addEventListener("submit", function(e) {
     const plastik = Number(document.getElementById("plastik").value) || 0;
     const sabun = Number(document.getElementById("sabun").value) || 0;
     const pewangi = Number(document.getElementById("pewangi").value) || 0;
+    const hargaPlastik = parseHarga(document.getElementById("hargaPlastik").value);
+    const hargaSabun = parseHarga(document.getElementById("hargaSabun").value);
+    const hargaPewangi = parseHarga(document.getElementById("hargaPewangi").value);
+    const kg = Number(document.getElementById("kg").value) || 0;
 
     let uangBayar = 0, kembalian = 0;
     if (bayar === "SUDAH") {
@@ -1978,6 +1994,10 @@ form.addEventListener("submit", function(e) {
         plastik,
         sabun,
         pewangi,
+        hargaPlastik,
+        hargaSabun,
+        hargaPewangi,
+        kg,
         koin,
         harga,
         uangBayar,
@@ -2239,6 +2259,10 @@ window.startEdit = function(id) {
         document.getElementById("edPlastik").value = it.plastik || 0;
         document.getElementById("edSabun").value = it.sabun || 0;
         document.getElementById("edPewangi").value = it.pewangi || 0;
+        document.getElementById("edHargaPlastik").value = it.hargaPlastik ? formatRupiah(it.hargaPlastik) : "";
+        document.getElementById("edHargaSabun").value = it.hargaSabun ? formatRupiah(it.hargaSabun) : "";
+        document.getElementById("edHargaPewangi").value = it.hargaPewangi ? formatRupiah(it.hargaPewangi) : "";
+        document.getElementById("edKg").value = it.kg || "";
         document.getElementById("edBayar").value = sudah ? "SUDAH" : "BELUM";
         document.getElementById("edMetode").value = it.metode === "QRIS" ? "QRIS" : "CASH";
         document.getElementById("edHarga").value = sudah && it.harga ? formatRupiah(it.harga) : "";
@@ -2296,6 +2320,10 @@ window.saveEdit = function() {
     it.plastik = Number(document.getElementById("edPlastik").value) || 0;
     it.sabun = Number(document.getElementById("edSabun").value) || 0;
     it.pewangi = Number(document.getElementById("edPewangi").value) || 0;
+    it.hargaPlastik = parseHarga(document.getElementById("edHargaPlastik").value);
+    it.hargaSabun = parseHarga(document.getElementById("edHargaSabun").value);
+    it.hargaPewangi = parseHarga(document.getElementById("edHargaPewangi").value);
+    it.kg = Number(document.getElementById("edKg").value) || 0;
     it.bayar = bayar;
     it.metode = bayar === "SUDAH" ? metode : "";
     it.harga = harga;
@@ -2357,9 +2385,10 @@ window.openReceiptModal = function(id) {
         <div class="thermal-receipt-divider"></div>
         <div class="thermal-receipt-row" style="font-weight:bold;"><span>LAYANAN</span></div>
         <div style="font-size:10.5px; font-weight:bold; margin-bottom:2px;">${fullJenis}</div>
-        ${Number(it.plastik) > 0 ? `<div class="thermal-receipt-row"><span>• Plastik</span><span>${it.plastik} Pcs</span></div>` : ''}
-        ${Number(it.sabun) > 0 ? `<div class="thermal-receipt-row"><span>• Sabun Cuci</span><span>${it.sabun} Sachet</span></div>` : ''}
-        ${Number(it.pewangi) > 0 ? `<div class="thermal-receipt-row"><span>• Pewangi</span><span>${it.pewangi} Sachet</span></div>` : ''}
+        ${Number(it.kg) > 0 ? `<div class="thermal-receipt-row"><span>• Berat</span><span>${it.kg} KG</span></div>` : ''}
+        ${Number(it.plastik) > 0 ? `<div class="thermal-receipt-row"><span>• Plastik (${it.plastik} Pcs)</span><span>${Number(it.hargaPlastik) > 0 ? formatRupiah(it.hargaPlastik) : '-'}</span></div>` : ''}
+        ${Number(it.sabun) > 0 ? `<div class="thermal-receipt-row"><span>• Sabun (${it.sabun} Sachet)</span><span>${Number(it.hargaSabun) > 0 ? formatRupiah(it.hargaSabun) : '-'}</span></div>` : ''}
+        ${Number(it.pewangi) > 0 ? `<div class="thermal-receipt-row"><span>• Pewangi (${it.pewangi} Sachet)</span><span>${Number(it.hargaPewangi) > 0 ? formatRupiah(it.hargaPewangi) : '-'}</span></div>` : ''}
         <div class="thermal-receipt-divider"></div>
         <div class="thermal-receipt-row">
             <span>Status</span>
@@ -2561,9 +2590,10 @@ window.printAllReceipts = function(doPrint = false, scope = null) {
             <div class="thermal-receipt-divider"></div>
             <div class="thermal-receipt-row" style="font-weight:bold;"><span>LAYANAN</span></div>
             <div style="font-size:10.5px;font-weight:bold;margin-bottom:2px;">${fullJenis}</div>
-            ${Number(it.plastik) > 0 ? `<div class="thermal-receipt-row"><span>• Plastik</span><span>${it.plastik} Pcs</span></div>` : ''}
-            ${Number(it.sabun) > 0 ? `<div class="thermal-receipt-row"><span>• Sabun Cuci</span><span>${it.sabun} Sachet</span></div>` : ''}
-            ${Number(it.pewangi) > 0 ? `<div class="thermal-receipt-row"><span>• Pewangi</span><span>${it.pewangi} Sachet</span></div>` : ''}
+            ${Number(it.kg) > 0 ? `<div class="thermal-receipt-row"><span>• Berat</span><span>${it.kg} KG</span></div>` : ''}
+            ${Number(it.plastik) > 0 ? `<div class="thermal-receipt-row"><span>• Plastik (${it.plastik} Pcs)</span><span>${Number(it.hargaPlastik) > 0 ? formatRupiah(it.hargaPlastik) : '-'}</span></div>` : ''}
+            ${Number(it.sabun) > 0 ? `<div class="thermal-receipt-row"><span>• Sabun (${it.sabun} Sachet)</span><span>${Number(it.hargaSabun) > 0 ? formatRupiah(it.hargaSabun) : '-'}</span></div>` : ''}
+            ${Number(it.pewangi) > 0 ? `<div class="thermal-receipt-row"><span>• Pewangi (${it.pewangi} Sachet)</span><span>${Number(it.hargaPewangi) > 0 ? formatRupiah(it.hargaPewangi) : '-'}</span></div>` : ''}
             <div class="thermal-receipt-divider"></div>
             <div class="thermal-receipt-row"><span>Status</span><span class="receipt-stamp">LUNAS</span></div>
             <div class="thermal-receipt-row"><span>Metode</span><span style="font-weight:bold;">${escapeHTML(it.metode)}</span></div>
@@ -2755,9 +2785,10 @@ function drawReceiptCanvas(it, logoImg) {
     items.push({ k: "div", style: "dash" });
     items.push({ k: "t", s: "LAYANAN", sz: 13, b: true, a: "l" });
     items.push({ k: "t", s: jenisFull, sz: 13, b: true, a: "l" });
-    if (Number(it.plastik) > 0) items.push({ k: "row", l: "• Plastik", r: it.plastik + " Pcs" });
-    if (Number(it.sabun) > 0) items.push({ k: "row", l: "• Sabun Cuci", r: it.sabun + " Sachet" });
-    if (Number(it.pewangi) > 0) items.push({ k: "row", l: "• Pewangi", r: it.pewangi + " Sachet" });
+    if (Number(it.kg) > 0) items.push({ k: "row", l: "• Berat", r: it.kg + " KG" });
+    if (Number(it.plastik) > 0) items.push({ k: "row", l: "• Plastik (" + it.plastik + " Pcs)", r: Number(it.hargaPlastik) > 0 ? formatRupiah(it.hargaPlastik) : "-" });
+    if (Number(it.sabun) > 0) items.push({ k: "row", l: "• Sabun (" + it.sabun + " Sachet)", r: Number(it.hargaSabun) > 0 ? formatRupiah(it.hargaSabun) : "-" });
+    if (Number(it.pewangi) > 0) items.push({ k: "row", l: "• Pewangi (" + it.pewangi + " Sachet)", r: Number(it.hargaPewangi) > 0 ? formatRupiah(it.hargaPewangi) : "-" });
     items.push({ k: "div", style: "dash" });
     items.push({ k: "stamp", l: "Status", r: lunas ? "LUNAS" : "BELUM", c: lunas ? "#059669" : "#dc2626", ok: lunas });
     if (lunas) items.push({ k: "row", l: "Metode", r: it.metode || "-", b2: true });
@@ -2916,9 +2947,10 @@ function drawBulkReceiptsCanvas(receipts, logoImg) {
         allItems.push({ k: "div", style: "dash" });
         allItems.push({ k: "t", s: "LAYANAN", sz: 13, b: true, a: "l" });
         allItems.push({ k: "t", s: jenisFull, sz: 13, b: true, a: "l" });
-        if (Number(it.plastik) > 0) allItems.push({ k: "row", l: "• Plastik", r: it.plastik + " Pcs" });
-        if (Number(it.sabun) > 0) allItems.push({ k: "row", l: "• Sabun Cuci", r: it.sabun + " Sachet" });
-        if (Number(it.pewangi) > 0) allItems.push({ k: "row", l: "• Pewangi", r: it.pewangi + " Sachet" });
+        if (Number(it.kg) > 0) allItems.push({ k: "row", l: "• Berat", r: it.kg + " KG" });
+        if (Number(it.plastik) > 0) allItems.push({ k: "row", l: "• Plastik (" + it.plastik + " Pcs)", r: Number(it.hargaPlastik) > 0 ? formatRupiah(it.hargaPlastik) : "-" });
+        if (Number(it.sabun) > 0) allItems.push({ k: "row", l: "• Sabun (" + it.sabun + " Sachet)", r: Number(it.hargaSabun) > 0 ? formatRupiah(it.hargaSabun) : "-" });
+        if (Number(it.pewangi) > 0) allItems.push({ k: "row", l: "• Pewangi (" + it.pewangi + " Sachet)", r: Number(it.hargaPewangi) > 0 ? formatRupiah(it.hargaPewangi) : "-" });
         allItems.push({ k: "div", style: "dash" });
         allItems.push({ k: "stamp", l: "Status", r: lunas ? "LUNAS" : "BELUM", c: lunas ? "#059669" : "#dc2626", ok: lunas });
         if (lunas) allItems.push({ k: "row", l: "Metode", r: it.metode || "-", b2: true });
@@ -3226,9 +3258,10 @@ function buildReceiptWaText(it) {
     L.push(dash);
     L.push("LAYANAN");
     waWrap(getJenisLaundryFullName(it.jenis), WA_W).forEach(x => L.push(x));
-    if (Number(it.plastik) > 0) L.push(...waRow("• Plastik", it.plastik + " Pcs"));
-    if (Number(it.sabun) > 0) L.push(...waRow("• Sabun Cuci", it.sabun + " Sachet"));
-    if (Number(it.pewangi) > 0) L.push(...waRow("• Pewangi", it.pewangi + " Sachet"));
+    if (Number(it.kg) > 0) L.push(...waRow("• Berat", it.kg + " KG"));
+    if (Number(it.plastik) > 0) L.push(...waRow("• Plastik (" + it.plastik + " Pcs)", Number(it.hargaPlastik) > 0 ? formatRupiah(it.hargaPlastik) : "-"));
+    if (Number(it.sabun) > 0) L.push(...waRow("• Sabun (" + it.sabun + " Sachet)", Number(it.hargaSabun) > 0 ? formatRupiah(it.hargaSabun) : "-"));
+    if (Number(it.pewangi) > 0) L.push(...waRow("• Pewangi (" + it.pewangi + " Sachet)", Number(it.hargaPewangi) > 0 ? formatRupiah(it.hargaPewangi) : "-"));
     L.push(dash);
     L.push(...waRow("Status", lunas ? "LUNAS" : "BELUM"));
     if (lunas) L.push(...waRow("Metode", it.metode || "-"));
@@ -3343,10 +3376,11 @@ No. Struk : ${receiptNo(it)}
 Tanggal   : ${it.tanggal} ${it.waktu}
 Pelanggan : ${it.nama}
 --------------------------------
-Layanan   : ${fullJenis}${Number(it.plastik) > 0 ? `
-• Plastik    : ${it.plastik} Pcs` : ''}${Number(it.sabun) > 0 ? `
-• Sabun Cuci : ${it.sabun} Sachet` : ''}${Number(it.pewangi) > 0 ? `
-• Pewangi    : ${it.pewangi} Sachet` : ''}
+Layanan   : ${fullJenis}${Number(it.kg) > 0 ? `
+• Berat     : ${it.kg} KG` : ''}${Number(it.plastik) > 0 ? `
+• Plastik   : ${it.plastik} Pcs | ${Number(it.hargaPlastik) > 0 ? formatRupiah(it.hargaPlastik) : '-'}` : ''}${Number(it.sabun) > 0 ? `
+• Sabun     : ${it.sabun} Sachet | ${Number(it.hargaSabun) > 0 ? formatRupiah(it.hargaSabun) : '-'}` : ''}${Number(it.pewangi) > 0 ? `
+• Pewangi   : ${it.pewangi} Sachet | ${Number(it.hargaPewangi) > 0 ? formatRupiah(it.hargaPewangi) : '-'}` : ''}
 --------------------------------
 Status    : ${it.bayar}
 Metode    : ${it.metode||'-'}
@@ -3407,7 +3441,7 @@ document.getElementById("excelBtn").addEventListener("click", function() {
     </style></head><body>
     <h2>History Pembukuan Pudel Two Laundry Coin (Hari Ini &amp; Hari Sebelumnya)</h2>
     <table><thead><tr>
-    <th>No</th><th>Tanggal</th><th>Waktu</th><th>Nama</th><th>Jenis</th><th>Plastik</th><th>Sabun</th><th>Pewangi</th><th>Harga</th><th>Bayar</th><th>Metode</th><th>Uang Bayar</th><th>Kembalian</th><th>No. Struk</th><th>Koin</th>
+    <th>No</th><th>Tanggal</th><th>Waktu</th><th>Nama</th><th>Jenis</th><th>KG</th><th>Plastik</th><th>Harga Plastik</th><th>Sabun</th><th>Harga Sabun</th><th>Pewangi</th><th>Harga Pewangi</th><th>Harga</th><th>Bayar</th><th>Metode</th><th>Uang Bayar</th><th>Kembalian</th><th>No. Struk</th><th>Koin</th>
     </tr></thead><tbody>`;
 
     let totalPendapatan = 0;
@@ -3505,6 +3539,10 @@ document.getElementById("excelUpload").addEventListener("change", function(e) {
                     plastik: plt,
                     sabun: sbn,
                     pewangi: pwg,
+                    hargaPlastik: 0,
+                    hargaSabun: 0,
+                    hargaPewangi: 0,
+                    kg: 0,
                     koin: koinX || getDefaultCoins(jns),
                     bayar: isSudah ? 'SUDAH' : 'BELUM',
                     metode: isSudah ? (mtdRaw.includes('QRIS') ? 'QRIS' : 'CASH') : '',
