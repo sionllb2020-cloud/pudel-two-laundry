@@ -2414,8 +2414,7 @@ function getBulkReceiptRows(scope) {
     return rows.slice().sort((a, b) => (Number(a.noStruk) || 0) - (Number(b.noStruk) || 0) || String(a.tanggal || "").localeCompare(String(b.tanggal || "")));
 }
 
-window.sendAllReceiptsWA = function() {
-    // Kirim struk lunas sesuai cakupan tombol yang sedang dipakai.
+window.sendAllReceiptsWA = async function() {
     const receipts = getBulkReceiptRows(activeBulkReceiptScope);
 
     if (!receipts.length) {
@@ -2423,26 +2422,112 @@ window.sendAllReceiptsWA = function() {
         return;
     }
 
-    const rawPhone = prompt("Masukkan nomor WhatsApp tujuan (opsional). Contoh: 081234567890.\nKosongkan jika ingin memilih kontak di WhatsApp:", "");
-    if (rawPhone === null) return;
+    const rawPhone = document.getElementById("bulkWaInput")?.value || "";
     const phone = normalizeWaPhone(rawPhone);
     if (rawPhone.trim() && phone.length < 9) {
         alert("Nomor WhatsApp tidak valid. Periksa kembali nomornya.");
         return;
     }
 
-    const message = receipts.map((it, index) => {
-        const receiptText = buildReceiptWaText(it).replace(/^```\n?/, "").replace(/\n?```$/, "");
-        return `STRUK ${index + 1} DARI ${receipts.length}\n${receiptText}`;
-    }).join("\n\n\n");
-
-    if (message.length > 55000) {
-        alert("Jumlah struk terlalu banyak untuk dikirim dalam satu pesan WhatsApp. Silakan pilih dan kirim struk satu per satu agar pesan tidak terpotong.");
-        return;
+    const btn = document.querySelector("#allReceiptsPreviewModal button[onclick*='sendAllReceiptsWA']");
+    const oldText = btn ? btn.textContent : "Kirim Semua ke WhatsApp";
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Menyiapkan Struk...";
     }
 
-    const url = `https://api.whatsapp.com/send?${phone ? "phone=" + phone + "&" : ""}text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    try {
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const logo = await loadLogoImage();
+
+        if (isMobile && !phone && navigator.canShare && navigator.share) {
+            let files = [];
+            try {
+                files = await Promise.all(receipts.map(async (it, idx) => {
+                    const canvas = drawReceiptCanvas(it, logo);
+                    const blob = await canvasToBlob(canvas);
+                    const safeName = String(it.nama || "customer").replace(/[^\w]+/g, "_");
+                    const fileName = `Struk_${idx + 1}_${safeName}_${it.noStruk || it.id}.png`;
+                    return new File([blob], fileName, { type: "image/png" });
+                }));
+            } catch (e) {
+                files = [];
+            }
+
+            if (files.length > 0 && navigator.canShare({ files })) {
+                try {
+                    await navigator.share({
+                        files,
+                        title: `${activeBulkReceiptScope === "today" ? "Struk Hari Ini" : "Struk Riwayat"} - ${storeInfo.name}`
+                    });
+                    return;
+                } catch (err) {
+                    if (err && err.name === "AbortError") return;
+                }
+            }
+
+            try {
+                const bulkCanvas = drawBulkReceiptsCanvas(receipts, logo);
+                const bulkBlob = await canvasToBlob(bulkCanvas);
+                const scopeTitle = activeBulkReceiptScope === "today" ? "Hari_Ini" : "Riwayat";
+                const singleRollFile = new File([bulkBlob], `Semua_Struk_${scopeTitle}_${receipts.length}transaksi.png`, { type: "image/png" });
+                if (navigator.canShare({ files: [singleRollFile] })) {
+                    await navigator.share({
+                        files: [singleRollFile],
+                        title: `Semua Struk (${receipts.length}) - ${storeInfo.name}`
+                    });
+                    return;
+                }
+            } catch (err) {
+                if (err && err.name === "AbortError") return;
+            }
+        }
+
+        const bulkCanvas = receipts.length === 1 ? drawReceiptCanvas(receipts[0], logo) : drawBulkReceiptsCanvas(receipts, logo);
+        const bulkBlob = await canvasToBlob(bulkCanvas);
+
+        let copied = false;
+        try {
+            if (navigator.clipboard && window.ClipboardItem) {
+                await navigator.clipboard.write([new ClipboardItem({ "image/png": bulkBlob })]);
+                copied = true;
+            }
+        } catch (err) {
+            copied = false;
+        }
+
+        const appUrl = phone ? `whatsapp://send?phone=${phone}` : `whatsapp://send`;
+        const webUrl = phone ? `https://api.whatsapp.com/send?phone=${phone}` : `https://api.whatsapp.com/send`;
+        let leftPage = false;
+        const onLeave = () => { leftPage = true; };
+        window.addEventListener("blur", onLeave, { once: true });
+        document.addEventListener("visibilitychange", onLeave, { once: true });
+        window.location.href = appUrl;
+        setTimeout(() => {
+            window.removeEventListener("blur", onLeave);
+            document.removeEventListener("visibilitychange", onLeave);
+            if (!leftPage) window.open(webUrl, "_blank");
+        }, 1800);
+
+        if (copied) {
+            showToast(`Foto struk (${receipts.length} struk) siap! Di chat WhatsApp${phone ? " (+" + phone + ")" : ""}${isMobile ? " tekan Tempel (tahan di kolom pesan / tombol Tempel di keyboard), lalu Kirim." : " tekan Ctrl+V lalu Kirim."}`, 8500);
+        } else {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(bulkBlob);
+            a.download = `Semua_Struk_${activeBulkReceiptScope}_${receipts.length}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast(`Foto ${receipts.length} struk siap dan telah diunduh. Silakan lampirkan gambar struk ke WhatsApp.`, 8000);
+        }
+    } catch (error) {
+        alert("Gagal menyiapkan foto struk: " + (error?.message || error));
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = oldText || "Kirim Semua ke WhatsApp";
+        }
+    }
 };
 
 window.printAllReceipts = function(doPrint = false, scope = null) {
@@ -2528,6 +2613,7 @@ window.printAllReceipts = function(doPrint = false, scope = null) {
               ${receiptMarkup}
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px solid #ddd;flex-shrink:0;">
+              <input type="tel" id="bulkWaInput" inputmode="numeric" pattern="[0-9]*" autocomplete="tel" maxlength="20" oninput="this.value=this.value.replace(/[^0-9]/g, '')" onpaste="setTimeout(() => { this.value=this.value.replace(/[^0-9]/g, ''); }, 0)" placeholder="Ketik No Whatsapp / Klik" aria-label="Nomor WhatsApp (angka saja)" style="flex:1 1 100%;min-width:0;height:36px;padding:0 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;color:#28465A;background:#fff;box-sizing:border-box;">
               <button type="button" onclick="document.getElementById('allReceiptsPreviewModal').remove()" style="flex:1 1 70px;background:#6b7280;color:#fff;border:0;border-radius:8px;padding:11px 8px;font-weight:700;cursor:pointer;">Tutup</button>
               <button type="button" onclick="printAllReceipts(true)" style="flex:1 1 100px;background:#2563eb;color:#fff;border:0;border-radius:8px;padding:11px 8px;font-weight:700;cursor:pointer;">Cetak Semua</button>
               <button type="button" onclick="sendAllReceiptsWA()" style="flex:1 1 145px;background:#10b981;color:#fff;border:0;border-radius:8px;padding:11px 8px;font-weight:700;cursor:pointer;">Kirim Semua ke WhatsApp</button>
@@ -2751,6 +2837,193 @@ function drawReceiptCanvas(it, logoImg) {
                             ctx.lineWidth = 1.5;
                             ctx.strokeStyle = m.c;
                             ctx.strokeRect(bx, by, rw, bh);
+                            ctx.restore();
+                            text(m.r, PAD + CW - 5, y, "right", m.c);
+                        } else {
+                            text(m.r, PAD + CW, y, "right");
+                        }
+                    }
+                    y += lh + (isStamp ? 4 : 0);
+                } else {
+                    wrap(m.l, sz, m.b, CW).forEach(line => {
+                        if (draw) { setF(sz, m.b); text(line, PAD, y, "left"); }
+                        y += lh;
+                    });
+                    if (draw) {
+                        setF(sz, m.b || m.b2 || isStamp);
+                        text(m.r, PAD + CW, y, "right", isStamp ? m.c : "#000");
+                    }
+                    y += lh;
+                }
+            } else if (m.k === "div") {
+                y += 4;
+                if (draw) {
+                    ctx.save();
+                    ctx.strokeStyle = "#000";
+                    if (m.style === "dash") { ctx.setLineDash([4, 3]); ctx.lineWidth = 1; }
+                    else { ctx.lineWidth = 2; }
+                    ctx.beginPath();
+                    ctx.moveTo(PAD, y + 0.5);
+                    ctx.lineTo(PAD + CW, y + 0.5);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+                y += 7;
+            }
+        });
+        return y;
+    }
+
+    const mctx = document.createElement("canvas").getContext("2d");
+    const totalH = Math.ceil(run(mctx, false) + 18);
+    const canvas = document.createElement("canvas");
+    canvas.width = W * S;
+    canvas.height = totalH * S;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(S, S);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, totalH);
+    run(ctx, true);
+    return canvas;
+}
+
+function drawBulkReceiptsCanvas(receipts, logoImg) {
+    const W = 384, S = 2, PAD = 14, CW = W - PAD * 2;
+    const FONT = "'Courier New', Courier, monospace";
+
+    const allItems = [];
+    receipts.forEach((it, idx) => {
+        if (idx > 0) {
+            allItems.push({ k: "gap", h: 8 });
+            allItems.push({ k: "cutter", num: idx + 1, total: receipts.length });
+            allItems.push({ k: "gap", h: 8 });
+        }
+        const lunas = it.bayar === "SUDAH";
+        const jenisFull = getJenisLaundryFullName(it.jenis);
+        const pay = getPayInfo(it);
+
+        allItems.push({ k: "gap", h: 2 });
+        allItems.push({ k: "logo" });
+        allItems.push({ k: "t", s: storeInfo.name, sz: 17, b: true, a: "c" });
+        allItems.push({ k: "t", s: storeInfo.tagline, sz: 12, b: true, a: "c" });
+        allItems.push({ k: "t", s: storeInfo.address, sz: 11, a: "c" });
+        allItems.push({ k: "t", s: "Telp/WA: " + storeInfo.phone, sz: 11, a: "c" });
+        allItems.push({ k: "div", style: "dash" });
+        allItems.push({ k: "row", l: "No. Struk", r: receiptNo(it), b2: true });
+        allItems.push({ k: "row", l: "Tanggal", r: it.tanggal });
+        allItems.push({ k: "row", l: "Waktu", r: it.waktu });
+        allItems.push({ k: "row", l: "Customer", r: it.nama, b2: true });
+        allItems.push({ k: "div", style: "dash" });
+        allItems.push({ k: "t", s: "LAYANAN", sz: 13, b: true, a: "l" });
+        allItems.push({ k: "t", s: jenisFull, sz: 13, b: true, a: "l" });
+        if (Number(it.plastik) > 0) allItems.push({ k: "row", l: "• Plastik", r: it.plastik + " Pcs" });
+        if (Number(it.sabun) > 0) allItems.push({ k: "row", l: "• Sabun Cuci", r: it.sabun + " Sachet" });
+        if (Number(it.pewangi) > 0) allItems.push({ k: "row", l: "• Pewangi", r: it.pewangi + " Sachet" });
+        allItems.push({ k: "div", style: "dash" });
+        allItems.push({ k: "stamp", l: "Status", r: lunas ? "LUNAS" : "BELUM", c: lunas ? "#059669" : "#dc2626", ok: lunas });
+        if (lunas) allItems.push({ k: "row", l: "Metode", r: it.metode || "-", b2: true });
+        allItems.push({ k: "div", style: "solid" });
+        allItems.push({ k: "row", l: "TOTAL", r: formatRupiah(it.harga), sz: 17, b: true });
+        if (lunas) {
+            allItems.push({ k: "row", l: "Uang Bayar", r: formatRupiah(pay.uang), b2: true });
+            allItems.push({ k: "row", l: "Kembalian", r: formatRupiah(pay.kembali), b2: true });
+        }
+        allItems.push({ k: "div", style: "dash" });
+        allItems.push({ k: "gap", h: 4 });
+        allItems.push({ k: "t", s: "TERIMA KASIH BANYAK", sz: 13, b: true, a: "c" });
+        allItems.push({ k: "t", s: storeInfo.footer, sz: 11, a: "c" });
+        allItems.push({ k: "t", s: "*** " + storeInfo.name + " ***", sz: 12, b: true, a: "c" });
+    });
+
+    function run(ctx, draw) {
+        let y = 16;
+        ctx.textBaseline = "top";
+        const setF = (sz, b) => { ctx.font = (b ? "bold " : "") + sz + "px " + FONT; };
+        const wrap = (s, sz, b, maxW) => {
+            setF(sz, b);
+            const words = String(s).split(/\s+/);
+            const lines = [];
+            let cur = "";
+            words.forEach(w => {
+                const t = cur ? cur + " " + w : w;
+                if (ctx.measureText(t).width <= maxW || !cur) cur = t;
+                else { lines.push(cur); cur = w; }
+            });
+            if (cur) lines.push(cur);
+            return lines;
+        };
+        const text = (s, x, yy, align, color) => {
+            ctx.textAlign = align;
+            ctx.fillStyle = color || "#000";
+            ctx.fillText(s, x, yy);
+        };
+
+        allItems.forEach(m => {
+            if (m.k === "gap") {
+                y += m.h;
+            } else if (m.k === "cutter") {
+                y += 6;
+                if (draw) {
+                    ctx.save();
+                    ctx.strokeStyle = "#475569";
+                    ctx.setLineDash([4, 4]);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(PAD, y + 8);
+                    ctx.lineTo(PAD + CW, y + 8);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    ctx.save();
+                    setF(10, true);
+                    const cutTxt = `✂  STRUK ${m.num} DARI ${m.total}  ✂`;
+                    const tw = ctx.measureText(cutTxt).width;
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect((W - tw) / 2 - 8, y, tw + 16, 16);
+                    ctx.fillStyle = "#334155";
+                    ctx.textAlign = "center";
+                    ctx.fillText(cutTxt, W / 2, y + 2);
+                    ctx.restore();
+                }
+                y += 20;
+            } else if (m.k === "logo") {
+                if (logoImg && logoImg.naturalWidth) {
+                    const ratio = logoImg.naturalWidth / logoImg.naturalHeight;
+                    let h = 66, w = h * ratio;
+                    if (w > 120) { w = 120; h = w / ratio; }
+                    if (draw) ctx.drawImage(logoImg, (W - w) / 2, y, w, h);
+                    y += h + 6;
+                }
+            } else if (m.k === "t") {
+                const lh = Math.round(m.sz * 1.4);
+                wrap(m.s, m.sz, m.b, CW).forEach(line => {
+                    if (draw) {
+                        setF(m.sz, m.b);
+                        if (m.a === "c") text(line, W / 2, y, "center");
+                        else text(line, PAD, y, "left");
+                    }
+                    y += lh;
+                });
+            } else if (m.k === "row" || m.k === "stamp") {
+                const sz = m.sz || 13;
+                const lh = Math.round(sz * 1.45);
+                const isStamp = m.k === "stamp";
+                setF(sz, m.b);
+                const lw = ctx.measureText(m.l).width;
+                setF(sz, m.b || m.b2 || isStamp);
+                const rw = ctx.measureText(m.r).width;
+                if (lw + rw + 10 <= CW) {
+                    if (draw) {
+                        setF(sz, m.b);
+                        text(m.l, PAD, y, "left");
+                        setF(sz, m.b || m.b2 || isStamp);
+                        if (isStamp) {
+                            const bx = PAD + CW - rw - 10, by = y - 2, bh = lh + 2;
+                            ctx.save();
+                            ctx.setLineDash([3, 2]);
+                            ctx.lineWidth = 1.5;
+                            ctx.strokeStyle = m.c;
+                            ctx.strokeRect(bx, by, rw + 10, bh);
                             ctx.restore();
                             text(m.r, PAD + CW - 5, y, "right", m.c);
                         } else {
