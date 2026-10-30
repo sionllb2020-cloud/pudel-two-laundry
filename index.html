@@ -1078,6 +1078,25 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
     .history-table td { color: #000 !important; }
     .print-total { display: block !important; border: 2px solid #000; margin-top: 15px; padding: 10px; font-weight: bold; text-align: right; }
 }
+
+/* Kalkulator harga */
+.calculator-card { max-width: 390px; }
+.calculator-body { padding: 16px; }
+.calculator-expression { min-height: 24px; color: #718096; text-align: right; font-size: 14px; overflow-wrap: anywhere; }
+.calculator-display { min-height: 54px; padding: 8px 4px 14px; text-align: right; font-size: 32px; font-weight: 800; color: #1e293b; overflow-wrap: anywhere; }
+.calculator-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.calculator-grid button, .calc-copy { min-height: 49px; border: 1px solid #dbe4ea; border-radius: 10px; background: #f5f8fa; color: #26384a; font-size: 19px; font-weight: 700; cursor: pointer; }
+.calculator-grid button:active { transform: scale(.97); }
+.calculator-grid .calc-clear { background: #fee2e2; color: #b91c1c; }
+.calculator-grid .calc-equal { background: #2563eb; color: white; }
+.calculator-grid .calc-zero { grid-column: span 1; }
+.calc-copy { width: 100%; margin-top: 11px; min-height: 43px; background: #168653; color: #fff; font-size: 13px; }
+body.dark-theme .calculator-expression { color: #a8bac6; }
+body.dark-theme .calculator-display { color: #f1f5f9; }
+body.dark-theme .calculator-grid button { background: #243746; color: #eaf2f6; border-color: #405766; }
+body.dark-theme .calculator-grid .calc-clear { background: #5a292d; color: #fecaca; }
+body.dark-theme .calculator-grid .calc-equal { background: #2563eb; color: #fff; }
+
 </style>
 </head>
 <body>
@@ -1230,6 +1249,7 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
                         <th>PLASTIK</th>
                         <th>SABUN</th>
                         <th>PEWANGI</th>
+                        <th>KG</th>
                         <th>HARGA</th>
                         <th>UANG BAYAR</th>
                         <th>KEMBALIAN</th>
@@ -1271,7 +1291,7 @@ body.dark-theme #historyCard.fs-fallback { background: #17242E; color: #EAF2F6; 
             <div class="table-wrapper">
                 <table class="history-table">
                     <thead><tr>
-                        <th>NO</th><th>TANGGAL</th><th>JAM</th><th>NAMA</th><th>JENIS LAUNDRY</th><th>PLASTIK</th><th>SABUN</th><th>PEWANGI</th><th>HARGA</th><th>UANG BAYAR</th><th>KEMBALIAN</th><th>STATUS BAYAR</th><th>METODE PEMBAYARAN</th><th class="action-column">STRUK</th>
+                        <th>NO</th><th>TANGGAL</th><th>JAM</th><th>NAMA</th><th>JENIS LAUNDRY</th><th>PLASTIK</th><th>SABUN</th><th>PEWANGI</th><th>KG</th><th>HARGA</th><th>UANG BAYAR</th><th>KEMBALIAN</th><th>STATUS BAYAR</th><th>METODE PEMBAYARAN</th><th class="action-column">STRUK</th>
                     </tr></thead>
                     <tbody id="previousHistoryBody"></tbody>
                 </table>
@@ -2052,7 +2072,7 @@ function renderTable() {
     function buildRows(target, rows, emptyText) {
         target.innerHTML = "";
         if (!rows.length) {
-            target.innerHTML = `<tr><td colspan="14" class="empty">${emptyText}</td></tr>`;
+            target.innerHTML = `<tr><td colspan="15" class="empty">${emptyText}</td></tr>`;
             return;
         }
         rows.forEach((it, idx) => {
@@ -2067,6 +2087,7 @@ function renderTable() {
                 <td data-label="Plastik">${it.plastik ? it.plastik + ' Pcs' : '-'}</td>
                 <td data-label="Sabun">${it.sabun ? it.sabun + ' Sachet' : '-'}</td>
                 <td data-label="Pewangi">${it.pewangi ? it.pewangi + ' Sachet' : '-'}</td>
+                <td data-label="KG">${Number(it.kg) > 0 ? Number(it.kg).toLocaleString("id-ID", { maximumFractionDigits: 2 }) + ' KG' : '-'}</td>
                 <td data-label="Harga">${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(it.harga)+'</span>' : '-'}</td>
                 <td data-label="Uang Bayar">${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(pay.uang)+'</span>' : '-'}</td>
                 <td data-label="Kembalian">${it.bayar === "SUDAH" ? '<span class="price">'+formatRupiah(pay.kembali)+'</span>' : '-'}</td>
@@ -3632,6 +3653,46 @@ themeToggle.addEventListener("change", function() {
     document.body.classList.toggle("dark-theme", this.checked);
     localStorage.setItem("laundryTheme", this.checked ? "dark" : "light");
 });
+
+
+// KALKULATOR: penjumlahan beberapa nominal harga.
+let calculatorValue = "0";
+let calculatorTotal = 0;
+let calculatorHasResult = false;
+function calculatorRefresh(expressionText = "") {
+    document.getElementById("calculatorDisplay").textContent = calculatorValue;
+    document.getElementById("calculatorExpression").textContent = expressionText;
+}
+function calculatorAppend(char) {
+    if (char === ".") {
+        if (calculatorValue.includes(".")) return;
+        calculatorValue += ".";
+    } else if (char === "+") {
+        const amount = Number(calculatorValue) || 0;
+        calculatorTotal += amount;
+        calculatorValue = "0";
+        calculatorHasResult = false;
+        calculatorRefresh("Subtotal: " + formatRupiah(calculatorTotal));
+        return;
+    } else {
+        if (calculatorHasResult) { calculatorValue = "0"; calculatorTotal = 0; calculatorHasResult = false; }
+        calculatorValue = calculatorValue === "0" ? char : calculatorValue + char;
+    }
+    calculatorRefresh(calculatorTotal ? "Subtotal: " + formatRupiah(calculatorTotal) : "");
+}
+function calculatorEquals() {
+    const result = calculatorTotal + (Number(calculatorValue) || 0);
+    calculatorValue = String(result);
+    calculatorTotal = 0;
+    calculatorHasResult = true;
+    calculatorRefresh("Hasil penjumlahan");
+}
+function calculatorClear() { calculatorValue = "0"; calculatorTotal = 0; calculatorHasResult = false; calculatorRefresh(); }
+function calculatorBackspace() { if (calculatorHasResult) return calculatorClear(); calculatorValue = calculatorValue.length > 1 ? calculatorValue.slice(0, -1) : "0"; calculatorRefresh(calculatorTotal ? "Subtotal: " + formatRupiah(calculatorTotal) : ""); }
+function calculatorCopyResult() { const n = Number(calculatorValue) || 0; const textValue = formatRupiah(n); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(textValue).then(() => showToast("Hasil kalkulator disalin")); else alert(textValue); }
+document.getElementById("navCalculator").addEventListener("click", () => { calculatorClear(); document.getElementById("calculatorModal").style.display = "flex"; });
+document.getElementById("calculatorCloseBtn").addEventListener("click", () => { document.getElementById("calculatorModal").style.display = "none"; });
+document.getElementById("calculatorModal").addEventListener("click", e => { if (e.target.id === "calculatorModal") e.currentTarget.style.display = "none"; });
 
 applyAdminUI();
 renderTable();
