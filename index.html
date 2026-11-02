@@ -1421,7 +1421,7 @@ body.dark-theme .stock-neg { color: #FB7185; }
         <div class="header-tools">
             <div class="header-actions">
                 <button type="button" class="hdr-btn hdr-edit" id="navEdit">Edit Data</button>
-                <button type="button" class="hdr-btn hdr-lock" id="navLock" style="display:none;">Kunci</button>
+                <button type="button" class="hdr-btn hdr-lock" id="navLock" style="display:none;">Lock</button>
             </div>
             <label class="theme-switcher">
                 <input type="checkbox" id="themeToggle">
@@ -1441,10 +1441,10 @@ body.dark-theme .stock-neg { color: #FB7185; }
     <!-- NAVIGASI -->
     <nav class="main-nav" id="mainNav">
         <button type="button" class="nav-btn active" id="navBook">Pembukuan</button>
-        <button type="button" class="nav-btn" id="navStock">Pengelolaan Stok</button>
+        <button type="button" class="nav-btn" id="navStock">Stock</button>
         <button type="button" class="nav-btn" id="navExpense">Pengeluaran</button>
         <span class="nav-spacer"></span>
-        <span class="admin-badge" id="adminBadge">Terkunci</span>
+        <span class="admin-badge" id="adminBadge">Lock</span>
     </nav>
 
     <!-- ===================== TAMPILAN: PEMBUKUAN ===================== -->
@@ -2353,7 +2353,7 @@ function touchAdmin() { if (isAdmin()) adminUntil = Date.now() + ADMIN_TTL; }
 function applyAdminUI() {
     const on = isAdmin();
     const badge = document.getElementById("adminBadge");
-    badge.textContent = on ? "Mode Admin Aktif" : "Terkunci";
+    badge.textContent = on ? "Mode Admin Aktif" : "Lock";
     badge.classList.toggle("on", on);
     document.getElementById("navLock").style.display = on ? "inline-flex" : "none";
 }
@@ -2373,7 +2373,7 @@ function tryLogin(code) {
     if (failCount >= 5) {
         failCount = 0;
         localStorage.setItem(STORAGE_LOCK_UNTIL, String(Date.now() + 30000));
-        return { ok: false, msg: "Kode salah 5 kali. Terkunci 30 detik." };
+        return { ok: false, msg: "Kode salah 5 kali. Lock 30 detik." };
     }
     return { ok: false, msg: `Kode akses salah (${failCount}/5).` };
 }
