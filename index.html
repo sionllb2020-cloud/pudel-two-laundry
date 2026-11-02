@@ -1228,6 +1228,190 @@ body.dark-theme .stock-neg { color: #FB7185; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+
+/* ===== OPTIMALISASI PENGINPUTAN DI HANDPHONE =====
+   Hanya mengatur kenyamanan input pada layar kecil.
+   Alur sistem, fungsi tombol, urutan tombol, dan tampilan desktop tetap.
+*/
+@media screen and (max-width: 650px) {
+    /* Area form lebih lega dan tidak membuat layar bergeser ke samping */
+    .form-card,
+    #viewStock .form-card,
+    #viewExpense .form-card,
+    .adm-editbox {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .form-card form,
+    .form-grid,
+    .adm-form-grid {
+        min-width: 0;
+        width: 100%;
+    }
+
+    /* Ukuran input nyaman disentuh dan teks mudah dibaca tanpa zoom otomatis */
+    .form-group input,
+    .form-group select,
+    .adm-form-grid input,
+    .adm-form-grid select,
+    .modal-input,
+    .filter-area input,
+    #admSearch,
+    #admExpSearch {
+        min-width: 0;
+        width: 100%;
+        min-height: 50px;
+        height: 50px;
+        padding: 0 13px;
+        font-size: 16px !important;
+        line-height: 1.35;
+        border-radius: 12px;
+        scroll-margin-top: 100px;
+        scroll-margin-bottom: 150px;
+    }
+
+    .form-group label,
+    .adm-form-grid label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 13px;
+        line-height: 1.4;
+        font-weight: 800;
+    }
+
+    .form-group input::placeholder,
+    .adm-form-grid input::placeholder,
+    .modal-input::placeholder {
+        font-size: 14px;
+        opacity: .78;
+    }
+
+    /* Main input: customer dan jenis laundry lebar penuh; isian lain rapi 2 kolom */
+    #laundryForm .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: 14px 10px;
+    }
+    #laundryForm .form-grid > .form-group:nth-child(1),
+    #laundryForm .form-grid > .form-group:nth-child(2) {
+        grid-column: 1 / -1;
+    }
+    #laundryForm .form-grid > .form-group:nth-child(3),
+    #laundryForm .form-grid > .form-group:nth-child(4),
+    #laundryForm .form-grid > .form-group:nth-child(5) {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px 10px;
+        align-items: center;
+    }
+    #laundryForm .form-grid > .form-group:nth-child(3) label,
+    #laundryForm .form-grid > .form-group:nth-child(4) label,
+    #laundryForm .form-grid > .form-group:nth-child(5) label {
+        grid-column: 1 / -1;
+        margin: 0;
+    }
+    #laundryForm .form-grid > .form-group:nth-child(3) input,
+    #laundryForm .form-grid > .form-group:nth-child(4) input,
+    #laundryForm .form-grid > .form-group:nth-child(5) input {
+        margin-top: 0 !important;
+    }
+    #laundryForm .form-grid > .form-group:nth-child(n+6) {
+        grid-column: span 1;
+    }
+    #laundryForm .form-grid > #jasaGroup,
+    #laundryForm .form-grid > #kgJasaGroup {
+        grid-column: span 1;
+    }
+    #laundryForm .form-grid > .form-group:nth-child(1) input,
+    #laundryForm .form-grid > .form-group:nth-child(2) select {
+        width: 100%;
+    }
+    #laundryForm .jasa-hint {
+        min-height: 0;
+        margin-top: 5px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    /* Form stok dan pengeluaran: tidak ada kolom yang terlalu sempit */
+    #stockForm .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px 10px;
+    }
+    #stockForm .form-grid > .form-group:last-child {
+        grid-column: 1 / -1;
+    }
+    #expenseForm .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 13px;
+    }
+
+    /* Form edit data di pop-up lebih mudah diisi dan dibaca */
+    .adm-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px 10px;
+    }
+    .adm-form-grid > div {
+        min-width: 0;
+    }
+    .adm-form-grid > div:has(input[type="text"][id^="edHarga"]),
+    .adm-form-grid > div:has(input[id="edNama"]) {
+        grid-column: 1 / -1;
+    }
+    .adm-form-grid input,
+    .adm-form-grid select {
+        height: 48px;
+        padding: 0 10px;
+    }
+    .adm-form-grid input + input {
+        margin-top: 7px !important;
+    }
+    .adm-editbox {
+        padding: 11px;
+        overflow: hidden;
+    }
+    .modal-body {
+        max-height: calc(92dvh - 70px);
+        overflow-y: auto;
+        padding-bottom: max(18px, env(safe-area-inset-bottom));
+    }
+    .modal-input {
+        margin-bottom: 10px;
+    }
+
+    /* Memudahkan memilih tanggal, mencari, dan mengetik nominal */
+    input[type="date"], input[type="time"], input[type="number"],
+    input[inputmode="numeric"], input[inputmode="decimal"] {
+        font-variant-numeric: tabular-nums;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .adm-form-grid input:focus,
+    .adm-form-grid select:focus,
+    .modal-input:focus {
+        outline: none;
+        border-color: #1E88E5;
+        box-shadow: 0 0 0 4px rgba(30,136,229,.15);
+    }
+}
+
+@media screen and (max-width: 380px) {
+    #laundryForm .form-grid,
+    #stockForm .form-grid,
+    .adm-form-grid {
+        column-gap: 8px;
+    }
+    .form-group input,
+    .form-group select,
+    .adm-form-grid input,
+    .adm-form-grid select {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
 </style>
 </head>
 <body>
