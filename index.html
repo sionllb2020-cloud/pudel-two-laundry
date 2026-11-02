@@ -3178,7 +3178,7 @@ window.openReceiptModal = function(id) {
         <div class="thermal-receipt-row" style="font-weight:bold;"><span>LAYANAN</span></div>
         <div style="font-size:10.5px; font-weight:bold; margin-bottom:2px;">${fullJenis}</div>
         ${Number(it.kg) > 0 ? `<div class="thermal-receipt-row"><span>• Berat</span><span>${it.kg} KG</span></div>` : ''}
-        ${getHargaNormalItem(it) > 0 ? `<div class="thermal-receipt-row"><span>• Harga</span><span>${formatRupiah(getHargaNormalItem(it))}</span></div>` : ''}
+        ${getHargaNormalItem(it) > 0 ? `<div class="thermal-receipt-row"><span>• Harga Laundry</span><span>${formatRupiah(getHargaNormalItem(it))}</span></div>` : ''}
         ${Number(it.plastik) > 0 ? `<div class="thermal-receipt-row"><span>• Plastik (${it.plastik} Pcs)</span><span>${Number(it.hargaPlastik) > 0 ? formatRupiah(it.hargaPlastik) : '-'}</span></div>` : ''}
         ${Number(it.sabun) > 0 ? `<div class="thermal-receipt-row"><span>• Sabun (${it.sabun} Sachet)</span><span>${Number(it.hargaSabun) > 0 ? formatRupiah(it.hargaSabun) : '-'}</span></div>` : ''}
         ${Number(it.pewangi) > 0 ? `<div class="thermal-receipt-row"><span>• Pewangi (${it.pewangi} Sachet)</span><span>${Number(it.hargaPewangi) > 0 ? formatRupiah(it.hargaPewangi) : '-'}</span></div>` : ''}
@@ -3385,7 +3385,7 @@ window.printAllReceipts = function(doPrint = false, scope = null) {
             <div class="thermal-receipt-row" style="font-weight:bold;"><span>LAYANAN</span></div>
             <div style="font-size:10.5px;font-weight:bold;margin-bottom:2px;">${fullJenis}</div>
             ${Number(it.kg) > 0 ? `<div class="thermal-receipt-row"><span>• Berat</span><span>${it.kg} KG</span></div>` : ''}
-            ${getHargaNormalItem(it) > 0 ? `<div class="thermal-receipt-row"><span>• Harga</span><span>${formatRupiah(getHargaNormalItem(it))}</span></div>` : ''}
+            ${getHargaNormalItem(it) > 0 ? `<div class="thermal-receipt-row"><span>• Harga Laundry</span><span>${formatRupiah(getHargaNormalItem(it))}</span></div>` : ''}
             ${Number(it.plastik) > 0 ? `<div class="thermal-receipt-row"><span>• Plastik (${it.plastik} Pcs)</span><span>${Number(it.hargaPlastik) > 0 ? formatRupiah(it.hargaPlastik) : '-'}</span></div>` : ''}
             ${Number(it.sabun) > 0 ? `<div class="thermal-receipt-row"><span>• Sabun (${it.sabun} Sachet)</span><span>${Number(it.hargaSabun) > 0 ? formatRupiah(it.hargaSabun) : '-'}</span></div>` : ''}
             ${Number(it.pewangi) > 0 ? `<div class="thermal-receipt-row"><span>• Pewangi (${it.pewangi} Sachet)</span><span>${Number(it.hargaPewangi) > 0 ? formatRupiah(it.hargaPewangi) : '-'}</span></div>` : ''}
