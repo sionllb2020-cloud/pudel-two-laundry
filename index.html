@@ -158,16 +158,27 @@ body {
 /* NAVIGASI */
 .main-nav {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    background: rgba(255,255,255,.98);
-    border: 1px solid rgba(215,224,235,.85);
-    border-radius: 14px;
-    padding: 8px 10px;
-    margin-bottom: 18px;
-    box-shadow: 0 6px 22px rgba(30,55,90,.07);
-}
+    gap: 12px;
+    padding: 10px;
+    background-color: #f8f9fa;
+  }
+
+  .nav-btn {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .nav-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+    
 .nav-btn {
     height: 38px;
     padding: 0 14px;
@@ -1444,7 +1455,6 @@ body.dark-theme .stock-neg { color: #FB7185; }
         <button type="button" class="nav-btn active" id="navBook">Pembukuan</button>
         <button type="button" class="nav-btn" id="navStock">Stock</button>
         <button type="button" class="nav-btn" id="navExpense">Pengeluaran</button>
-        <span class="nav-spacer"></span>
     </nav>
 
     <!-- ===================== TAMPILAN: PEMBUKUAN ===================== -->
