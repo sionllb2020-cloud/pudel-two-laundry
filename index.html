@@ -1459,12 +1459,12 @@ body.dark-theme .stock-neg { color: #FB7185; }
                 <div class="dashboard-card blue">
                     <h3>Stok Sabun</h3>
                     <strong id="stockTotal_sabun">0 Pcs</strong>
-                    <small id="stockUsed_sabun">Terpakai hari ini: 0 Pcs</small>
+                    <small id="stockUsed_sabun">Terpakai hari ini: 0 Sachet</small>
                 </div>
                 <div class="dashboard-card purple">
                     <h3>Stok Pewangi</h3>
                     <strong id="stockTotal_pewangi">0 Pcs</strong>
-                    <small id="stockUsed_pewangi">Terpakai hari ini: 0 Pcs</small>
+                    <small id="stockUsed_pewangi">Terpakai hari ini: 0 Sachet</small>
                 </div>
                 <div class="dashboard-card teal">
                     <h3>Stok Plastik</h3>
@@ -1478,8 +1478,8 @@ body.dark-theme .stock-neg { color: #FB7185; }
             <h2>Input Stok</h2>
             <form id="stockForm">
                 <div class="form-grid stock-form-grid">
-                    <div class="form-group"><label>Sabun (Pcs)</label><input type="number" id="stokIn_sabun" min="0" step="1" inputmode="numeric" placeholder="Jumlah Sabun"></div>
-                    <div class="form-group"><label>Pewangi (Pcs)</label><input type="number" id="stokIn_pewangi" min="0" step="1" inputmode="numeric" placeholder="Jumlah Pewangi"></div>
+                    <div class="form-group"><label>Sabun (Sachet)</label><input type="number" id="stokIn_sabun" min="0" step="1" inputmode="numeric" placeholder="Jumlah Sabun"></div>
+                    <div class="form-group"><label>Pewangi (Sachet)</label><input type="number" id="stokIn_pewangi" min="0" step="1" inputmode="numeric" placeholder="Jumlah Pewangi"></div>
                     <div class="form-group"><label>Plastik (Pcs)</label><input type="number" id="stokIn_plastik" min="0" step="1" inputmode="numeric" placeholder="Jumlah Plastik"></div>
                     <div class="form-group">
                         <label>Cara Input</label>
@@ -4577,7 +4577,7 @@ function refreshStockUI() {
         const have = toQty(stock[s.key]);
         getEl("stockTotal_" + s.key).textContent = have + " Pcs";
         getEl("stockUsed_" + s.key).textContent =
-            (have === 0 ? "Stok habis - " : "") + "Terpakai hari ini: " + usedTodayQty(s.key) + " Pcs";
+            (have === 0 ? "Stok habis - " : "") + "Terpakai hari ini: " + usedTodayQty(s.key) + " Pcs/Sachet";
     });
     const body = getEl("stockLogBody");
     if (!stockLog.length) {
