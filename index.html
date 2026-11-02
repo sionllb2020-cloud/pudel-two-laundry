@@ -4489,13 +4489,29 @@ if (calcModalEl) calcModalEl.addEventListener("click", e => { if (e.target.id ==
 // =========================================================
 const APP_VIEWS = { book: "viewBook", stock: "viewStock", expense: "viewExpense" };
 const VIEW_NAV = { book: "navBook", stock: "navStock", expense: "navExpense" };
-let currentView = "book";
+
+// Simpan menu terakhir agar setelah halaman di-refresh, aplikasi kembali ke menu yang sama.
+const ACTIVE_VIEW_STORAGE_KEY = "pudel_two_laundry_active_view";
+function readSavedActiveView() {
+    try {
+        const saved = localStorage.getItem(ACTIVE_VIEW_STORAGE_KEY);
+        return Object.prototype.hasOwnProperty.call(APP_VIEWS, saved) ? saved : "book";
+    } catch (error) {
+        return "book";
+    }
+}
+let currentView = readSavedActiveView();
 
 function getEl(id) { return document.getElementById(id); }
 
 function showView(name) {
     if (!APP_VIEWS[name]) name = "book";
     currentView = name;
+    try {
+        localStorage.setItem(ACTIVE_VIEW_STORAGE_KEY, name);
+    } catch (error) {
+        // Jika penyimpanan browser tidak tersedia, navigasi tetap berjalan normal.
+    }
     Object.keys(APP_VIEWS).forEach(k => {
         getEl(APP_VIEWS[k]).style.display = (k === name) ? "" : "none";
         getEl(VIEW_NAV[k]).classList.toggle("active", k === name);
@@ -4871,7 +4887,8 @@ window.deleteExpense = function(id) {
 };
 
 applyAdminUI();
-renderTable();
+// Pulihkan navigasi terakhir setelah seluruh fungsi tampilan selesai didefinisikan.
+showView(currentView);
 
 </script>
 </body>
