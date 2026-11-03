@@ -799,6 +799,100 @@ body.dark-theme .status-pop-card p { color: #EAF2F6; }
 .adm-coin-count { flex: 1; font-size: 22px; font-weight: 800; color: #0D9488; }
 .adm-coin-row button { height: 38px; padding: 0 14px; }
 
+/* =========================================================
+   STOK OPNAME STYLING
+========================================================= */
+.opname-dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+@media (max-width: 650px) {
+    .opname-dashboard {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .opname-dashboard > :nth-child(n+3) {
+        grid-column: 1 / -1;
+    }
+}
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.badge-match {
+    background: #DDF5E8;
+    color: #1F7A4B;
+    border: 1px solid #A9E0C2;
+}
+.badge-diff-neg {
+    background: #FDE8E5;
+    color: #C0392B;
+    border: 1px solid #F6BDB5;
+}
+.badge-diff-pos {
+    background: #E0F2FE;
+    color: #0369A1;
+    border: 1px solid #BAE6FD;
+}
+.opname-diff-hint {
+    margin-top: 5px;
+    font-size: 11.5px;
+    font-weight: 700;
+    min-height: 18px;
+    line-height: 1.35;
+}
+.opname-system-box {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+body.dark-theme .opname-system-box {
+    background: #0F1B24;
+    border-color: #38515E;
+    color: #EAF2F6;
+}
+body.dark-theme .badge-match {
+    background: #064E3B;
+    color: #6EE7B7;
+    border-color: #047857;
+}
+body.dark-theme .badge-diff-neg {
+    background: #4C0519;
+    color: #FDA4AF;
+    border-color: #9F1239;
+}
+body.dark-theme .badge-diff-pos {
+    background: #0C4A6E;
+    color: #7DD3FC;
+    border-color: #0369A1;
+}
+#opnamePrevSection { display: none; }
+#opnameDateFilter { display: none; }
+#opnameCard:fullscreen #opnamePrevSection,
+#opnameCard:-webkit-full-screen #opnamePrevSection,
+#opnameCard.fs-fallback #opnamePrevSection { display: block; }
+#opnameCard:fullscreen #opnameDateFilter,
+#opnameCard:-webkit-full-screen #opnameDateFilter,
+#opnameCard.fs-fallback #opnameDateFilter { display: block; }
+#opnameCard:fullscreen { overflow: auto; margin: 0; border-radius: 0; padding: 18px; background: #fff; }
+body.dark-theme #opnameCard:fullscreen { background: #17242E; color: #EAF2F6; }
+#opnameCard.fs-fallback { position: fixed; inset: 0; z-index: 9000; overflow: auto; margin: 0; border-radius: 0; padding: 14px; background: #fff; max-width: none; width: auto; -webkit-overflow-scrolling: touch; }
+body.dark-theme #opnameCard.fs-fallback { background: #17242E; color: #EAF2F6; }
+
 /* REALISTIC THERMAL RECEIPT 58MM POS STYLING */
 .receipt-paper-shadow {
     filter: drop-shadow(0 10px 25px rgba(0,0,0,0.2));
@@ -1579,7 +1673,7 @@ body.dark-theme .stock-neg { color: #FB7185; }
             <table class="history-table">
                 <thead>
                     <tr>
-                        <th>NO</th>
+                        <th>NO STRUK</th>
                         <th>TANGGAL</th>
                         <th>JAM</th>
                         <th>NAMA</th>
@@ -1630,7 +1724,7 @@ body.dark-theme .stock-neg { color: #FB7185; }
             <div class="table-wrapper">
                 <table class="history-table">
                     <thead><tr>
-                        <th>NO</th><th>TANGGAL</th><th>JAM</th><th>NAMA</th><th>JENIS LAUNDRY</th><th>PLASTIK</th><th>SABUN</th><th>PEWANGI</th><th>KG</th><th>HARGA</th><th>UANG BAYAR</th><th>KEMBALIAN</th><th>STATUS BAYAR</th><th>METODE PEMBAYARAN</th><th class="action-column">STRUK</th>
+                        <th>NO STRUK</th><th>TANGGAL</th><th>JAM</th><th>NAMA</th><th>JENIS LAUNDRY</th><th>PLASTIK</th><th>SABUN</th><th>PEWANGI</th><th>KG</th><th>HARGA</th><th>UANG BAYAR</th><th>KEMBALIAN</th><th>STATUS BAYAR</th><th>METODE PEMBAYARAN</th><th class="action-column">STRUK</th>
                     </tr></thead>
                     <tbody id="previousHistoryBody"></tbody>
                 </table>
@@ -1700,8 +1794,7 @@ body.dark-theme .stock-neg { color: #FB7185; }
                 </table>
             </div>
         </div>
-    </section>
-
+        
     <!-- ===================== TAMPILAN: PENGELUARAN ===================== -->
     <section id="viewExpense" class="app-view" style="display:none;">
         <div class="card">
@@ -1905,6 +1998,12 @@ body.dark-theme .stock-neg { color: #FB7185; }
             </div>
 
             <div class="adm-section">
+                <h4>Hapus / Kelola Riwayat Stok Opname</h4>
+                <p>Pemeriksaan stok opname yang dihapus akan mengembalikan penyesuaian stok yang telah diterapkan.</p>
+                <div class="adm-list" id="admOpnameList"></div>
+            </div>
+
+            <div class="adm-section">
                 <h4>Export / Upload Excel</h4>
                 <p>Export mengambil seluruh data pembukuan (hari ini dan hari sebelumnya). Upload memasukkan semua data dari file hasil export.</p>
                 <div class="bottom-actions">
@@ -1931,6 +2030,53 @@ body.dark-theme .stock-neg { color: #FB7185; }
                 <button type="button" class="btn-warn" id="admLockNow">Kunci Sekarang</button>
                 <button type="button" class="btn-gray" id="admClose">Tutup</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================
+     MODAL STRUK STOK OPNAME (58mm)
+========================================================= -->
+<div id="opnameReceiptModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#0f172a; color:#fff;">
+            <div>
+                <h3 style="font-size:14px; font-weight:bold; margin:0;">Struk Stok Opname</h3>
+                <p style="font-size:11px; color:#94a3b8; margin:2px 0 0 0;">Bukti pemeriksaan fisik stok riil di toko.</p>
+            </div>
+            <button type="button" onclick="closeOpnameReceiptModal()" style="width:32px; height:32px; border-radius:50%; background:#334155; color:#fff; border:none; cursor:pointer; font-size:14px;">X</button>
+        </div>
+        <div style="display:flex; gap:16px; padding:16px; background:#e2e8f0; overflow-y:auto; max-height:75vh; flex-wrap:wrap; justify-content:center;">
+            <div class="receipt-paper-shadow" style="flex-shrink:0;">
+                <svg class="receipt-sawtooth-top text-white" viewBox="0 0 100 8" preserveAspectRatio="none" style="width:58mm; height:8px; display:block; fill:#fff;">
+                    <path d="M0 8 L5 0 L10 8 L15 0 L20 8 L25 0 L30 8 L35 0 L40 8 L45 0 L50 8 L55 0 L60 8 L65 0 L70 8 L75 0 L80 8 L85 0 L90 8 L95 0 L100 8 Z"/>
+                </svg>
+                <div id="opnameThermalContent" class="thermal-receipt"></div>
+                <svg class="receipt-sawtooth-bottom text-white" viewBox="0 0 100 8" preserveAspectRatio="none" style="width:58mm; height:8px; display:block; fill:#fff;">
+                    <path d="M0 0 L5 8 L10 0 L15 8 L20 0 L25 8 L30 0 L35 8 L40 0 L45 8 L50 0 L55 8 L60 0 L65 8 L70 0 L75 8 L80 0 L85 8 L90 0 L95 8 L100 0 Z"/>
+                </svg>
+            </div>
+            <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:10px;">
+                <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
+                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">CETAK KE PRINTER</h4>
+                    <button type="button" onclick="printOpnameIframe()" style="width:100%; height:44px; background:#2563eb; color:#fff; font-weight:bold; border-radius:8px; border:none; cursor:pointer; font-size:13px; box-shadow:0 4px 10px rgba(37,99,235,0.25);">
+                        Cetak Struk Opname
+                    </button>
+                </div>
+                <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
+                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">KIRIM KE WHATSAPP</h4>
+                    <div style="display:flex; gap:6px;">
+                        <input type="tel" id="opnameWaInput" inputmode="numeric" pattern="[0-9]*" autocomplete="tel" maxlength="20" placeholder="Ketik No Whatsapp / Klik" style="flex:1; min-width:0; height:36px; padding:0 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#28465A; background:#fff;">
+                        <button type="button" onclick="sendOpnameWA()" style="height:36px; padding:0 12px; background:#10b981; color:#fff; border:none; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;">Kirim WA</button>
+                    </div>
+                </div>
+                <button type="button" onclick="copyOpnameText()" style="width:100%; height:40px; background:#475569; color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer;">
+                    Salin Teks Struk Opname
+                </button>
+            </div>
+        </div>
+        <div style="padding:10px 16px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end;">
+            <button type="button" onclick="closeOpnameReceiptModal()" style="height:36px; padding:0 20px; background:#64748b; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Tutup</button>
         </div>
     </div>
 </div>
@@ -2044,30 +2190,86 @@ let data = [];
 try { data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e) { data = []; }
 if (!Array.isArray(data)) data = [];
 
-// Nomor struk berurutan: 1, 2, 3, dst.
-function maxReceiptNo() {
-    let c = Number(localStorage.getItem(STORAGE_RECEIPT_NO)) || 0;
-    data.forEach(x => { if ((Number(x.noStruk) || 0) > c) c = Number(x.noStruk); });
-    return c;
+// Nomor struk berurutan per hari: tanggal, bulan, tahun, - nomor (contoh: 031126-1)
+// Jika ganti hari, nomor urut otomatis reset kembali ke 1
+function formatDdmmyy(d) {
+    if (!d || !(d instanceof Date) || isNaN(d.getTime())) d = new Date();
+    return `${pad(d.getDate())}${pad(d.getMonth() + 1)}${String(d.getFullYear()).slice(-2)}`;
 }
-function ensureReceiptNumbers() {
-    let c = maxReceiptNo();
-    // data terbaru ada di depan, jadi beri nomor dari data terlama
-    for (let i = data.length - 1; i >= 0; i--) {
-        if (!data[i].noStruk) { c++; data[i].noStruk = c; }
+
+function parseDdmmyyFromTanggal(tglStr) {
+    if (!tglStr) return formatDdmmyy(new Date());
+    const p = String(tglStr).split('/');
+    if (p.length === 3) {
+        return `${pad(p[0])}${pad(p[1])}${String(p[2]).trim().slice(-2)}`;
     }
-    try {
-        localStorage.setItem(STORAGE_RECEIPT_NO, String(c));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch(e) {}
+    return formatDdmmyy(new Date());
 }
-function nextReceiptNo() {
-    const c = maxReceiptNo() + 1;
-    localStorage.setItem(STORAGE_RECEIPT_NO, String(c));
-    return c;
+
+function nextReceiptNoForDate(tglStr) {
+    const prefix = parseDdmmyyFromTanggal(tglStr);
+    let maxNum = 0;
+    data.forEach(item => {
+        if (!item.noStruk) return;
+        const clean = String(item.noStruk).replace(/^#/, '').trim();
+        if (clean.startsWith(prefix + '-')) {
+            const numPart = parseInt(clean.substring(prefix.length + 1), 10);
+            if (!isNaN(numPart) && numPart > maxNum) maxNum = numPart;
+        }
+    });
+    return `${prefix}-${maxNum + 1}`;
 }
-function receiptNo(it) { return "#" + (it.noStruk || "-"); }
+
+function nextReceiptNo(tglStr) {
+    return nextReceiptNoForDate(tglStr || formatTanggal(new Date()));
+}
+
+function ensureReceiptNumbers() {
+    let modified = false;
+    const validPattern = /^\d{6}-\d+$/;
+
+    // Urutkan data berdasarkan waktu dibuat (id terlama lebih dulu) agar nomor urut 1, 2, 3 sesuai urutan transaksi
+    const sorted = data.slice().sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+    const dayCounters = {};
+
+    sorted.forEach(item => {
+        const prefix = parseDdmmyyFromTanggal(item.tanggal);
+        if (!dayCounters[prefix]) dayCounters[prefix] = 0;
+        const clean = String(item.noStruk || '').replace(/^#/, '').trim();
+        if (validPattern.test(clean) && clean.startsWith(prefix + '-')) {
+            const num = parseInt(clean.split('-')[1], 10);
+            if (!isNaN(num) && num > dayCounters[prefix]) {
+                dayCounters[prefix] = num;
+            }
+        }
+    });
+
+    sorted.forEach(item => {
+        const prefix = parseDdmmyyFromTanggal(item.tanggal);
+        const clean = String(item.noStruk || '').replace(/^#/, '').trim();
+        if (!validPattern.test(clean) || !clean.startsWith(prefix + '-')) {
+            dayCounters[prefix] = (dayCounters[prefix] || 0) + 1;
+            item.noStruk = `${prefix}-${dayCounters[prefix]}`;
+            modified = true;
+        }
+    });
+
+    if (modified) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+    }
+}
+
+function receiptNo(it) {
+    if (!it || !it.noStruk) return "-";
+    const s = String(it.noStruk).trim();
+    return s.startsWith("#") ? s : "#" + s;
+}
 ensureReceiptNumbers();
+
+const STORAGE_OPNAME = "pudel_stock_opname_data";
+let opnameList = readJSON(STORAGE_OPNAME, []);
+if (!Array.isArray(opnameList)) opnameList = [];
+function saveOpnameList() { try { localStorage.setItem(STORAGE_OPNAME, JSON.stringify(opnameList)); } catch(e) {} }
 
 // =========================================================
 // DATA STOK & PENGELUARAN
@@ -2251,7 +2453,7 @@ function jasaTextLines(it) {
 // Saat tabel pembukuan layar penuh, hanya elemen di dalam layar penuh yang terlihat.
 // Maka modal struk, toast & status dipindahkan ke dalam elemen layar penuh agar
 // struk bisa langsung dibuka tanpa keluar dari layar penuh.
-const OVERLAY_IDS = ["receiptModal", "accessModal", "adminModal", "appToast", "statusPop", "allReceiptsPreviewModal"];
+const OVERLAY_IDS = ["receiptModal", "opnameReceiptModal", "accessModal", "adminModal", "appToast", "statusPop", "allReceiptsPreviewModal"];
 function overlayHost() {
     return document.fullscreenElement || document.webkitFullscreenElement || document.body;
 }
@@ -2544,18 +2746,18 @@ setInterval(() => {
 (function() {
     const $id = id => document.getElementById(id);
     // Angka bulat (jumlah barang / stok)
-    const INT_IDS = ["plastik", "sabun", "pewangi", "edPlastik", "edSabun", "edPewangi", "stokIn_sabun", "stokIn_pewangi", "stokIn_plastik"];
+    const INT_IDS = ["plastik", "sabun", "pewangi", "edPlastik", "edSabun", "edPewangi", "stokIn_sabun", "stokIn_pewangi", "stokIn_plastik", "opnameFisik_sabun", "opnameFisik_pewangi", "opnameFisik_plastik"];
     // Angka boleh desimal (KG)
     const DEC_IDS = ["kg", "kgJasa", "edKg", "edKgJasa"];
     // Kolom uang (Rp)
     const MONEY_IDS = ["hargaPlastik", "hargaSabun", "hargaPewangi", "jasa", "harga", "uangBayar", "expJumlah",
                        "edHargaPlastik", "edHargaSabun", "edHargaPewangi", "edJasa", "edHarga", "edUang", "admExpJumlah"];
     // Kode akses & nomor WhatsApp: hanya digit
-    const DIGIT_IDS = ["accessInput", "newCode", "newCode2", "custWaInput", "bulkWaInput"];
+    const DIGIT_IDS = ["accessInput", "newCode", "newCode2", "custWaInput", "bulkWaInput", "opnameWaInput"];
     // Nomor telepon toko: angka dan tanda telepon umum
     const PHONE_IDS = ["cfgStorePhone"];
     // Kolom huruf: setiap kata diawali huruf kapital
-    const NAME_IDS = ["nama", "edNama", "expNama", "admExpNama", "cfgStoreName", "cfgStoreTagline", "cfgStoreAddress", "cfgStoreFooter"];
+    const NAME_IDS = ["nama", "edNama", "expNama", "admExpNama", "cfgStoreName", "cfgStoreTagline", "cfgStoreAddress", "cfgStoreFooter", "opnamePetugas", "opnameCatatan"];
 
     const S = arr => new Set(arr);
     const INT = S(INT_IDS), DEC = S(DEC_IDS), DIGITS = S(MONEY_IDS.concat(DIGIT_IDS)), PHONE = S(PHONE_IDS), NAMES = S(NAME_IDS);
@@ -2861,10 +3063,11 @@ form.addEventListener("submit", function(e) {
     }
 
     const nowSave = new Date();
+    const tglSave = formatTanggal(nowSave);
     const item = {
         id: Date.now(),
-        noStruk: nextReceiptNo(),
-        tanggal: formatTanggal(nowSave),
+        noStruk: nextReceiptNo(tglSave),
+        tanggal: tglSave,
         waktu: `${pad(nowSave.getHours())}:${pad(nowSave.getMinutes())}:${pad(nowSave.getSeconds())}`,
         nama,
         jenis,
@@ -2929,7 +3132,8 @@ function renderTable() {
         return !s || String(it.nama || "").toLowerCase().includes(s) ||
             String(it.jenis || "").toLowerCase().includes(s) ||
             getJenisLaundryFullName(it.jenis).toLowerCase().includes(s) ||
-            String(it.tanggal || "").includes(s);
+            String(it.tanggal || "").includes(s) ||
+            String(it.noStruk || "").toLowerCase().includes(s);
     }
     function dateToIso(value) {
         const parts = String(value || "").split("/");
@@ -2941,11 +3145,11 @@ function renderTable() {
             target.innerHTML = `<tr><td colspan="15" class="empty">${emptyText}</td></tr>`;
             return;
         }
-        rows.forEach((it, idx) => {
+        rows.forEach((it) => {
             const pay = getPayInfo(it);
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td data-label="No">${idx+1}</td>
+                <td data-label="No Struk" style="font-weight:bold;">${escapeHTML(receiptNo(it))}</td>
                 <td data-label="Tanggal">${escapeHTML(it.tanggal)}</td>
                 <td data-label="Jam">${escapeHTML(it.waktu)}</td>
                 <td data-label="Nama" style="font-weight:bold;">${escapeHTML(it.nama)}</td>
@@ -3332,9 +3536,6 @@ window.del = function(id) {
         revertStockUsage(it);
         data = data.filter(x => x.id !== id);
         if (editingId === id) { editingId = null; hideEditBox(); }
-        // Semua data terhapus: nomor struk berikutnya kembali ke 1. Jika data masih ada, lanjut dari nomor terbesar yang tersisa.
-        const remainingMaxReceiptNo = data.reduce((max, row) => Math.max(max, Number(row.noStruk) || 0), 0);
-        localStorage.setItem(STORAGE_RECEIPT_NO, String(remainingMaxReceiptNo));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         renderAdminList();
         renderTable();
