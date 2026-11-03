@@ -799,100 +799,6 @@ body.dark-theme .status-pop-card p { color: #EAF2F6; }
 .adm-coin-count { flex: 1; font-size: 22px; font-weight: 800; color: #0D9488; }
 .adm-coin-row button { height: 38px; padding: 0 14px; }
 
-/* =========================================================
-   STOK OPNAME STYLING
-========================================================= */
-.opname-dashboard {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-}
-@media (max-width: 650px) {
-    .opname-dashboard {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-    }
-    .opname-dashboard > :nth-child(n+3) {
-        grid-column: 1 / -1;
-    }
-}
-.badge-status {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    white-space: nowrap;
-}
-.badge-match {
-    background: #DDF5E8;
-    color: #1F7A4B;
-    border: 1px solid #A9E0C2;
-}
-.badge-diff-neg {
-    background: #FDE8E5;
-    color: #C0392B;
-    border: 1px solid #F6BDB5;
-}
-.badge-diff-pos {
-    background: #E0F2FE;
-    color: #0369A1;
-    border: 1px solid #BAE6FD;
-}
-.opname-diff-hint {
-    margin-top: 5px;
-    font-size: 11.5px;
-    font-weight: 700;
-    min-height: 18px;
-    line-height: 1.35;
-}
-.opname-system-box {
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 12px;
-    color: #334155;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-body.dark-theme .opname-system-box {
-    background: #0F1B24;
-    border-color: #38515E;
-    color: #EAF2F6;
-}
-body.dark-theme .badge-match {
-    background: #064E3B;
-    color: #6EE7B7;
-    border-color: #047857;
-}
-body.dark-theme .badge-diff-neg {
-    background: #4C0519;
-    color: #FDA4AF;
-    border-color: #9F1239;
-}
-body.dark-theme .badge-diff-pos {
-    background: #0C4A6E;
-    color: #7DD3FC;
-    border-color: #0369A1;
-}
-#opnamePrevSection { display: none; }
-#opnameDateFilter { display: none; }
-#opnameCard:fullscreen #opnamePrevSection,
-#opnameCard:-webkit-full-screen #opnamePrevSection,
-#opnameCard.fs-fallback #opnamePrevSection { display: block; }
-#opnameCard:fullscreen #opnameDateFilter,
-#opnameCard:-webkit-full-screen #opnameDateFilter,
-#opnameCard.fs-fallback #opnameDateFilter { display: block; }
-#opnameCard:fullscreen { overflow: auto; margin: 0; border-radius: 0; padding: 18px; background: #fff; }
-body.dark-theme #opnameCard:fullscreen { background: #17242E; color: #EAF2F6; }
-#opnameCard.fs-fallback { position: fixed; inset: 0; z-index: 9000; overflow: auto; margin: 0; border-radius: 0; padding: 14px; background: #fff; max-width: none; width: auto; -webkit-overflow-scrolling: touch; }
-body.dark-theme #opnameCard.fs-fallback { background: #17242E; color: #EAF2F6; }
-
 /* REALISTIC THERMAL RECEIPT 58MM POS STYLING */
 .receipt-paper-shadow {
     filter: drop-shadow(0 10px 25px rgba(0,0,0,0.2));
@@ -1517,6 +1423,296 @@ body.dark-theme .stock-neg { color: #FB7185; }
         padding-right: 10px;
     }
 }
+/* =========================================================
+   MODERN UI REFRESH — visual only; workflow and button layout unchanged
+   ========================================================= */
+:root {
+  --ui-primary: #2563EB;
+  --ui-primary-dark: #1D4ED8;
+  --ui-accent: #0F9D91;
+  --ui-ink: #172B4D;
+  --ui-muted: #64748B;
+  --ui-line: #E2E8F0;
+  --ui-surface: #FFFFFF;
+  --ui-soft: #F4F7FB;
+  --ui-shadow: 0 8px 28px rgba(15, 35, 65, .075);
+}
+html { background: #F3F6FB; }
+body {
+  background: radial-gradient(ellipse at 8% 0%, rgba(37,99,235,.08), transparent 34%),
+              radial-gradient(ellipse at 100% 12%, rgba(15,157,145,.07), transparent 30%),
+              #F4F7FB;
+  color: var(--ui-ink);
+}
+.container { max-width: 1440px; }
+.header {
+  background: linear-gradient(120deg, #EAF2FF 0%, #E8F8F6 100%);
+  color: #17365D;
+  border: 1px solid rgba(255,255,255,.85);
+  border-radius: 22px;
+  box-shadow: 0 12px 32px rgba(37,99,235,.09);
+}
+.header::after { background: rgba(37,99,235,.08); }
+.header-logo { background: rgba(255,255,255,.68); }
+.realtime { background: rgba(255,255,255,.62); border-color: rgba(255,255,255,.9); color: #284B70; }
+.theme-switcher { background: rgba(255,255,255,.72); border-color: rgba(255,255,255,.95); box-shadow: 0 3px 12px rgba(23,54,93,.06); }
+.main-nav {
+  background: rgba(255,255,255,.88);
+  border: 1px solid #E6ECF4;
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgba(15,35,65,.045);
+}
+.nav-btn {
+  border-radius: 11px;
+  border-color: #DCE5F0;
+  background: #F5F8FC;
+  color: #38516D;
+  font-weight: 750;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.nav-btn.active { background: var(--ui-primary); border-color: var(--ui-primary); box-shadow: 0 5px 13px rgba(37,99,235,.2); }
+.card {
+  background: var(--ui-surface);
+  border: 1px solid #E7ECF3;
+  border-radius: 18px;
+  box-shadow: var(--ui-shadow);
+}
+.card h2 { color: #1E5BBF; letter-spacing: -.25px; }
+.sub-title { color: #294766; }
+.form-group label { color: #405873; font-weight: 750; }
+.form-group input, .form-group select,
+.adm-form-grid input, .adm-form-grid select,
+.modal-input, .date-filter, .search-box {
+  border: 1px solid #D7E1EC;
+  border-radius: 11px;
+  background: #FBFCFE;
+  color: #172B4D;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.form-group input:focus, .form-group select:focus,
+.adm-form-grid input:focus, .adm-form-grid select:focus,
+.modal-input:focus, .date-filter:focus, .search-box:focus {
+  outline: none;
+  border-color: #75A5F8;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+button { border-radius: 10px; font-weight: 750; transition: filter .18s ease, box-shadow .18s ease, transform .15s ease; }
+button:focus-visible, .nav-btn:focus-visible { outline: 3px solid rgba(37,99,235,.3); outline-offset: 2px; }
+.dashboard-card {
+  border: 1px solid #E4EAF2;
+  border-radius: 16px;
+  box-shadow: 0 5px 16px rgba(15,35,65,.055);
+}
+.table-wrapper { border-radius: 13px; border-color: #E2E8F0; }
+.history-table { border-color: #E2E8F0; }
+.history-table th { background: #EEF4FC; color: #36516F; }
+.history-table td { color: #30465F; }
+.modal-card { border: 1px solid rgba(226,232,240,.9); border-radius: 18px; box-shadow: 0 22px 65px rgba(15,35,65,.2); }
+.modal-head { background: linear-gradient(110deg, #2563EB, #0F9D91); }
+.toast { border-radius: 13px; box-shadow: 0 10px 28px rgba(15,35,65,.18); }
+.upload-excel-floating { box-shadow: 0 8px 22px rgba(15,35,65,.18); }
+
+/* Tema gelap tetap kontras dan nyaman dibaca */
+body.dark-theme {
+  background: radial-gradient(ellipse at 10% 0%, rgba(37,99,235,.13), transparent 35%), #0E1722;
+  color: #E7EEF7;
+}
+body.dark-theme .header { background: linear-gradient(120deg, #1D3554, #17433F); color: #F0F6FF; border-color: #29445D; }
+body.dark-theme .header::after { background: rgba(255,255,255,.035); }
+body.dark-theme .realtime, body.dark-theme .theme-switcher { background: rgba(10,24,38,.45); border-color: #38536B; color: #E7EEF7; }
+body.dark-theme .main-nav { background: #172535; border-color: #2B4053; }
+body.dark-theme .nav-btn { background: #203247; color: #DCE8F5; border-color: #38516A; }
+body.dark-theme .nav-btn.active { background: #2563EB; border-color: #2563EB; color: #fff; }
+body.dark-theme .card { background: #172535; border-color: #2B4053; box-shadow: 0 8px 26px rgba(0,0,0,.16); }
+body.dark-theme .card h2 { color: #8DB8FF; }
+body.dark-theme .form-group label, body.dark-theme .sub-title { color: #D2DFEC; }
+body.dark-theme .form-group input, body.dark-theme .form-group select,
+body.dark-theme .adm-form-grid input, body.dark-theme .adm-form-grid select,
+body.dark-theme .modal-input, body.dark-theme .date-filter, body.dark-theme .search-box {
+  background: #101D2A; color: #E7EEF7; border-color: #3A5065;
+}
+body.dark-theme .form-group input:focus, body.dark-theme .form-group select:focus,
+body.dark-theme .modal-input:focus { border-color: #6EA4FF; box-shadow: 0 0 0 3px rgba(80,145,255,.16); }
+body.dark-theme .dashboard-card { background: #1B2D40; border-color: #30475D; }
+body.dark-theme .history-table th { background: #20364B; color: #DCE8F5; }
+body.dark-theme .history-table td { color: #DCE8F5; }
+body.dark-theme .table-wrapper { border-color: #344A5E; }
+body.dark-theme .modal-card { background: #172535; border-color: #344A5E; }
+
+@media screen and (max-width: 650px) {
+  body { padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
+  .header { border-radius: 17px; padding: 13px 12px; box-shadow: 0 7px 20px rgba(37,99,235,.08); }
+  .header h1 { letter-spacing: -.35px; }
+  .main-nav { border-radius: 14px; background: rgba(255,255,255,.96); box-shadow: 0 4px 14px rgba(15,35,65,.08); }
+  body.dark-theme .main-nav { background: rgba(23,37,53,.97); }
+  .nav-btn { min-height: 44px; padding-left: 14px; padding-right: 14px; }
+  .card { border-radius: 15px; padding: 14px 12px; }
+  .card h2 { font-size: 16px; }
+  .form-group input, .form-group select,
+  .adm-form-grid input, .adm-form-grid select,
+  .modal-input, .date-filter, .search-box { min-height: 48px; border-radius: 12px; }
+  .dashboard-card { border-radius: 14px; box-shadow: 0 4px 12px rgba(15,35,65,.05); }
+  .history-table tbody tr { border-radius: 13px; border-color: #E0E8F1; box-shadow: 0 4px 13px rgba(15,35,65,.055); }
+  .history-table tbody tr td { padding-top: 10px; padding-bottom: 10px; }
+  .modal-card { border-radius: 20px 20px 0 0; }
+  button { min-height: 42px; }
+}
+@media (max-width: 380px) {
+  .header h1 { font-size: 17px; }
+  .card { padding-left: 10px; padding-right: 10px; }
+  .nav-btn { padding-left: 12px; padding-right: 12px; font-size: 12px; }
+}
+
+</style>
+<style id="stock-modern-polish">
+
+
+/* ===== STOCK: tombol riwayat premium + modal modern ===== */
+#viewStock > .card:first-child .history-title-area {
+    position: relative;
+    min-height: 54px;
+    padding: 2px 2px 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, .20);
+}
+#viewStock > .card:first-child .history-title-area h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -.45px;
+    font-size: clamp(18px, 2.4vw, 22px);
+    font-weight: 850;
+    color: #18364b;
+}
+#viewStock > .card:first-child .history-title-area h2::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 25px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #2563eb, #14b8a6);
+}
+#viewStock #stockPreviousOpenBtn {
+    position: relative;
+    isolation: isolate;
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border: 1px solid rgba(255,255,255,.68);
+    border-radius: 16px;
+    color: #fff;
+    background: linear-gradient(145deg, #2563eb 0%, #168fba 52%, #0f9d91 100%);
+    box-shadow: 0 8px 18px rgba(37,99,235,.22), inset 0 1px 0 rgba(255,255,255,.35);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    cursor: pointer;
+}
+#viewStock #stockPreviousOpenBtn::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    z-index: -1;
+    border-radius: 19px;
+    background: linear-gradient(135deg, rgba(37,99,235,.18), rgba(20,184,166,.16));
+    filter: blur(5px);
+}
+#viewStock #stockPreviousOpenBtn svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.25; }
+#viewStock #stockPreviousOpenBtn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(37,99,235,.28), inset 0 1px 0 rgba(255,255,255,.4); filter: saturate(1.12); }
+#viewStock #stockPreviousOpenBtn:active { transform: scale(.95); }
+#viewStock #stockPreviousOpenBtn:focus-visible { outline: 3px solid rgba(37,99,235,.3); outline-offset: 4px; }
+#stockPreviousModal {
+    background: rgba(8, 22, 38, .62) !important;
+    -webkit-backdrop-filter: blur(9px);
+    backdrop-filter: blur(9px);
+    padding: 18px;
+}
+#stockPreviousModal .modal-card {
+    width: min(680px, 100%);
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    box-shadow: 0 28px 90px rgba(5, 25, 50, .34);
+    animation: stockModalIn .22s ease-out;
+}
+@keyframes stockModalIn {
+    from { opacity: 0; transform: translateY(12px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+#stockPreviousModal .modal-head {
+    align-items: center;
+    padding: 20px 22px;
+    background: linear-gradient(115deg, #174ea6 0%, #167cae 52%, #0d9488 100%);
+}
+#stockPreviousModal .modal-head h3 { color: #fff; font-size: 17px; font-weight: 850; letter-spacing: -.25px; }
+#stockPreviousModal .modal-head p { color: rgba(239,248,255,.86); font-size: 12px; margin-top: 4px; }
+#stockPreviousModal .modal-close {
+    width: 38px; height: 38px; min-width: 38px;
+    border: 1px solid rgba(255,255,255,.34);
+    border-radius: 13px;
+    color: #fff;
+    background: rgba(255,255,255,.16);
+    font-size: 16px;
+    font-weight: 800;
+    transition: background .18s ease, transform .18s ease;
+}
+#stockPreviousModal .modal-close:hover { background: rgba(255,255,255,.28); transform: rotate(90deg); }
+#stockPreviousModal .modal-body { padding: 22px; }
+#stockPreviousModal .history-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 13px 15px; margin-bottom: 12px !important;
+    border: 1px solid #dceaf2; border-radius: 16px;
+    background: linear-gradient(135deg, #f2f8ff, #effcf9);
+}
+#stockPreviousModal .history-title-area strong { color: #24445a; font-size: 13px; font-weight: 800; }
+#stockPreviousModal .date-filter {
+    width: 190px; height: 44px; border: 1px solid #cbdde9;
+    border-radius: 12px; background: #fff; color: #203b50;
+    font-weight: 700; box-shadow: 0 2px 7px rgba(30,64,100,.05);
+}
+#stockPreviousModal .modal-body > p { color: #718497 !important; line-height: 1.55; }
+#stockPreviousModal .stock-dashboard { gap: 12px; }
+#stockPreviousModal .dashboard-card {
+    min-height: 112px; border: 1px solid rgba(255,255,255,.75);
+    border-radius: 17px; box-shadow: 0 8px 20px rgba(25,55,85,.10);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+#stockPreviousModal .dashboard-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(25,55,85,.14); }
+#stockPreviousModal .dashboard-card h3 { font-size: 12px; font-weight: 800; }
+#stockPreviousModal .dashboard-card strong { font-size: clamp(20px, 3vw, 25px); font-weight: 900; }
+#stockPreviousModal #stockPreviousNote {
+    padding: 12px 14px; border-radius: 12px;
+    background: #f1f6fa; border: 1px solid #e1ebf1;
+    color: #607789 !important; line-height: 1.5;
+}
+body.dark-theme #viewStock > .card:first-child .history-title-area h2 { color: #eaf4fa; }
+body.dark-theme #viewStock > .card:first-child .history-title-area { border-bottom-color: rgba(148,163,184,.16); }
+body.dark-theme #stockPreviousModal .modal-card { background: linear-gradient(180deg, #1b2d3d, #152533); border-color: #3b5364; }
+body.dark-theme #stockPreviousModal .history-header { background: linear-gradient(135deg, #20384b, #1c3d3d); border-color: #3b5968; }
+body.dark-theme #stockPreviousModal .history-title-area strong { color: #e2edf4; }
+body.dark-theme #stockPreviousModal .date-filter { background: #102331; color: #eaf4fa; border-color: #496171; }
+body.dark-theme #stockPreviousModal .modal-body > p { color: #a9bdca !important; }
+body.dark-theme #stockPreviousModal #stockPreviousNote { background: #203442; border-color: #3b5361; color: #c0d1dc !important; }
+@media (max-width: 650px) {
+    #viewStock > .card:first-child .history-title-area { min-height: 50px; padding-bottom: 10px; }
+    #viewStock #stockPreviousOpenBtn { width: 46px; height: 46px; min-width: 46px; border-radius: 15px; }
+    #stockPreviousModal { align-items: center; padding: 10px; }
+    #stockPreviousModal .modal-card { width: 100%; max-height: min(88dvh, 720px); border-radius: 22px; }
+    #stockPreviousModal .modal-head { padding: 17px 16px; }
+    #stockPreviousModal .modal-body { padding: 15px; }
+    #stockPreviousModal .history-header { align-items: stretch; flex-direction: column; padding: 12px; }
+    #stockPreviousModal .date-filter { width: 100%; min-height: 46px; }
+    #stockPreviousModal .stock-dashboard { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; }
+    #stockPreviousModal .stock-dashboard > :nth-child(3) { grid-column: 1 / -1; }
+    #stockPreviousModal .dashboard-card { min-height: 96px; padding: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    #viewStock #stockPreviousOpenBtn, #stockPreviousModal .modal-card,
+    #stockPreviousModal .modal-close, #stockPreviousModal .dashboard-card { transition: none; animation: none; }
+}
+
 </style>
 </head>
 <body>
@@ -1742,7 +1938,12 @@ body.dark-theme .stock-neg { color: #FB7185; }
     <!-- ===================== TAMPILAN: PENGELOLAAN STOK ===================== -->
     <section id="viewStock" class="app-view" style="display:none;">
         <div class="card">
-            <h2>Pengelolaan Stok</h2>
+            <div class="history-title-area" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <h2 style="margin:0;">Pengelolaan Stok</h2>
+                <button type="button" class="history-fullscreen-btn" id="stockPreviousOpenBtn" title="Riwayat Stock Hari Sebelumnya" aria-label="Buka Riwayat Stock Hari Sebelumnya">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+                </button>
+            </div>
             <div class="dashboard stock-dashboard">
                 <div class="dashboard-card blue">
                     <h3>Stok Sabun</h3>
@@ -1794,7 +1995,31 @@ body.dark-theme .stock-neg { color: #FB7185; }
                 </table>
             </div>
         </div>
-        
+
+        <div id="stockPreviousModal" class="modal-overlay" style="display:none;z-index:12000;">
+            <div class="modal-card modal-wide" role="dialog" aria-modal="true" aria-labelledby="stockPreviousModalTitle">
+                <div class="modal-head">
+                    <div><h3 id="stockPreviousModalTitle">Riwayat Stock Hari Sebelumnya</h3><p>Lihat saldo stok pada tanggal yang dipilih</p></div>
+                    <button type="button" class="modal-close" id="stockPreviousCloseBtn" aria-label="Tutup">X</button>
+                </div>
+                <div class="modal-body">
+                    <div class="history-header" style="margin-bottom:12px;">
+                        <div class="history-title-area"><strong>Pilih Tanggal</strong></div>
+                        <div class="filter-area"><input type="date" id="stockPreviousDate" class="date-filter" aria-label="Pilih tanggal riwayat stock"></div>
+                    </div>
+                    <p style="font-size:12.5px;color:#64748b;margin:0 0 14px;">Pilih tanggal untuk melihat perkiraan sisa stok pada akhir hari tersebut.</p>
+                    <div class="dashboard stock-dashboard" style="margin-bottom:12px;">
+                        <div class="dashboard-card blue"><h3>Stok Sabun</h3><strong id="prevStock_sabun">0 Pcs</strong></div>
+                        <div class="dashboard-card purple"><h3>Stok Pewangi</h3><strong id="prevStock_pewangi">0 Pcs</strong></div>
+                        <div class="dashboard-card teal"><h3>Stok Plastik</h3><strong id="prevStock_plastik">0 Pcs</strong></div>
+                    </div>
+                    <small id="stockPreviousNote" style="display:block;color:#64748b;font-weight:600;">Pilih tanggal untuk melihat riwayat stok.</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
     <!-- ===================== TAMPILAN: PENGELUARAN ===================== -->
     <section id="viewExpense" class="app-view" style="display:none;">
         <div class="card">
@@ -1998,12 +2223,6 @@ body.dark-theme .stock-neg { color: #FB7185; }
             </div>
 
             <div class="adm-section">
-                <h4>Hapus / Kelola Riwayat Stok Opname</h4>
-                <p>Pemeriksaan stok opname yang dihapus akan mengembalikan penyesuaian stok yang telah diterapkan.</p>
-                <div class="adm-list" id="admOpnameList"></div>
-            </div>
-
-            <div class="adm-section">
                 <h4>Export / Upload Excel</h4>
                 <p>Export mengambil seluruh data pembukuan (hari ini dan hari sebelumnya). Upload memasukkan semua data dari file hasil export.</p>
                 <div class="bottom-actions">
@@ -2030,53 +2249,6 @@ body.dark-theme .stock-neg { color: #FB7185; }
                 <button type="button" class="btn-warn" id="admLockNow">Kunci Sekarang</button>
                 <button type="button" class="btn-gray" id="admClose">Tutup</button>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- =========================================================
-     MODAL STRUK STOK OPNAME (58mm)
-========================================================= -->
-<div id="opnameReceiptModal" class="modal-overlay" style="display:none;">
-    <div class="modal-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#0f172a; color:#fff;">
-            <div>
-                <h3 style="font-size:14px; font-weight:bold; margin:0;">Struk Stok Opname</h3>
-                <p style="font-size:11px; color:#94a3b8; margin:2px 0 0 0;">Bukti pemeriksaan fisik stok riil di toko.</p>
-            </div>
-            <button type="button" onclick="closeOpnameReceiptModal()" style="width:32px; height:32px; border-radius:50%; background:#334155; color:#fff; border:none; cursor:pointer; font-size:14px;">X</button>
-        </div>
-        <div style="display:flex; gap:16px; padding:16px; background:#e2e8f0; overflow-y:auto; max-height:75vh; flex-wrap:wrap; justify-content:center;">
-            <div class="receipt-paper-shadow" style="flex-shrink:0;">
-                <svg class="receipt-sawtooth-top text-white" viewBox="0 0 100 8" preserveAspectRatio="none" style="width:58mm; height:8px; display:block; fill:#fff;">
-                    <path d="M0 8 L5 0 L10 8 L15 0 L20 8 L25 0 L30 8 L35 0 L40 8 L45 0 L50 8 L55 0 L60 8 L65 0 L70 8 L75 0 L80 8 L85 0 L90 8 L95 0 L100 8 Z"/>
-                </svg>
-                <div id="opnameThermalContent" class="thermal-receipt"></div>
-                <svg class="receipt-sawtooth-bottom text-white" viewBox="0 0 100 8" preserveAspectRatio="none" style="width:58mm; height:8px; display:block; fill:#fff;">
-                    <path d="M0 0 L5 8 L10 0 L15 8 L20 0 L25 8 L30 0 L35 8 L40 0 L45 8 L50 0 L55 8 L60 0 L65 8 L70 0 L75 8 L80 0 L85 8 L90 0 L95 8 L100 0 Z"/>
-                </svg>
-            </div>
-            <div style="flex:1; min-width:240px; display:flex; flex-direction:column; gap:10px;">
-                <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
-                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">CETAK KE PRINTER</h4>
-                    <button type="button" onclick="printOpnameIframe()" style="width:100%; height:44px; background:#2563eb; color:#fff; font-weight:bold; border-radius:8px; border:none; cursor:pointer; font-size:13px; box-shadow:0 4px 10px rgba(37,99,235,0.25);">
-                        Cetak Struk Opname
-                    </button>
-                </div>
-                <div style="background:#fff; padding:14px; border-radius:12px; border:1px solid #cbd5e1;">
-                    <h4 style="font-size:12px; font-weight:bold; color:#1e293b; margin:0 0 6px 0;">KIRIM KE WHATSAPP</h4>
-                    <div style="display:flex; gap:6px;">
-                        <input type="tel" id="opnameWaInput" inputmode="numeric" pattern="[0-9]*" autocomplete="tel" maxlength="20" placeholder="Ketik No Whatsapp / Klik" style="flex:1; min-width:0; height:36px; padding:0 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px; color:#28465A; background:#fff;">
-                        <button type="button" onclick="sendOpnameWA()" style="height:36px; padding:0 12px; background:#10b981; color:#fff; border:none; border-radius:6px; font-weight:bold; font-size:12px; cursor:pointer;">Kirim WA</button>
-                    </div>
-                </div>
-                <button type="button" onclick="copyOpnameText()" style="width:100%; height:40px; background:#475569; color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer;">
-                    Salin Teks Struk Opname
-                </button>
-            </div>
-        </div>
-        <div style="padding:10px 16px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end;">
-            <button type="button" onclick="closeOpnameReceiptModal()" style="height:36px; padding:0 20px; background:#64748b; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Tutup</button>
         </div>
     </div>
 </div>
@@ -2261,15 +2433,9 @@ function ensureReceiptNumbers() {
 
 function receiptNo(it) {
     if (!it || !it.noStruk) return "-";
-    const s = String(it.noStruk).trim();
-    return s.startsWith("#") ? s : "#" + s;
+    return String(it.noStruk).replace(/^#/, "").trim();
 }
 ensureReceiptNumbers();
-
-const STORAGE_OPNAME = "pudel_stock_opname_data";
-let opnameList = readJSON(STORAGE_OPNAME, []);
-if (!Array.isArray(opnameList)) opnameList = [];
-function saveOpnameList() { try { localStorage.setItem(STORAGE_OPNAME, JSON.stringify(opnameList)); } catch(e) {} }
 
 // =========================================================
 // DATA STOK & PENGELUARAN
@@ -2453,7 +2619,7 @@ function jasaTextLines(it) {
 // Saat tabel pembukuan layar penuh, hanya elemen di dalam layar penuh yang terlihat.
 // Maka modal struk, toast & status dipindahkan ke dalam elemen layar penuh agar
 // struk bisa langsung dibuka tanpa keluar dari layar penuh.
-const OVERLAY_IDS = ["receiptModal", "opnameReceiptModal", "accessModal", "adminModal", "appToast", "statusPop", "allReceiptsPreviewModal"];
+const OVERLAY_IDS = ["receiptModal", "accessModal", "adminModal", "appToast", "statusPop", "allReceiptsPreviewModal"];
 function overlayHost() {
     return document.fullscreenElement || document.webkitFullscreenElement || document.body;
 }
@@ -2746,18 +2912,18 @@ setInterval(() => {
 (function() {
     const $id = id => document.getElementById(id);
     // Angka bulat (jumlah barang / stok)
-    const INT_IDS = ["plastik", "sabun", "pewangi", "edPlastik", "edSabun", "edPewangi", "stokIn_sabun", "stokIn_pewangi", "stokIn_plastik", "opnameFisik_sabun", "opnameFisik_pewangi", "opnameFisik_plastik"];
+    const INT_IDS = ["plastik", "sabun", "pewangi", "edPlastik", "edSabun", "edPewangi", "stokIn_sabun", "stokIn_pewangi", "stokIn_plastik"];
     // Angka boleh desimal (KG)
     const DEC_IDS = ["kg", "kgJasa", "edKg", "edKgJasa"];
     // Kolom uang (Rp)
     const MONEY_IDS = ["hargaPlastik", "hargaSabun", "hargaPewangi", "jasa", "harga", "uangBayar", "expJumlah",
                        "edHargaPlastik", "edHargaSabun", "edHargaPewangi", "edJasa", "edHarga", "edUang", "admExpJumlah"];
     // Kode akses & nomor WhatsApp: hanya digit
-    const DIGIT_IDS = ["accessInput", "newCode", "newCode2", "custWaInput", "bulkWaInput", "opnameWaInput"];
+    const DIGIT_IDS = ["accessInput", "newCode", "newCode2", "custWaInput", "bulkWaInput"];
     // Nomor telepon toko: angka dan tanda telepon umum
     const PHONE_IDS = ["cfgStorePhone"];
     // Kolom huruf: setiap kata diawali huruf kapital
-    const NAME_IDS = ["nama", "edNama", "expNama", "admExpNama", "cfgStoreName", "cfgStoreTagline", "cfgStoreAddress", "cfgStoreFooter", "opnamePetugas", "opnameCatatan"];
+    const NAME_IDS = ["nama", "edNama", "expNama", "admExpNama", "cfgStoreName", "cfgStoreTagline", "cfgStoreAddress", "cfgStoreFooter"];
 
     const S = arr => new Set(arr);
     const INT = S(INT_IDS), DEC = S(DEC_IDS), DIGITS = S(MONEY_IDS.concat(DIGIT_IDS)), PHONE = S(PHONE_IDS), NAMES = S(NAME_IDS);
@@ -4911,7 +5077,7 @@ function showView(name) {
         getEl(APP_VIEWS[k]).style.display = (k === name) ? "" : "none";
         getEl(VIEW_NAV[k]).classList.toggle("active", k === name);
     });
-    if (name === "stock") refreshStockUI();
+    if (name === "stock") { setDefaultPreviousStockDate(); refreshStockUI(); }
     if (name === "expense") refreshExpenseUI();
     if (name === "book") renderTable();
 }
@@ -4993,6 +5159,7 @@ function refreshStockUI() {
     const body = getEl("stockLogBody");
     if (!stockLog.length) {
         body.innerHTML = '<tr><td colspan="7" class="empty">Belum ada input stok.</td></tr>';
+        renderPreviousStock();
         return;
     }
     body.innerHTML = stockLog.map((it, i) => `
@@ -5005,7 +5172,83 @@ function refreshStockUI() {
             <td data-label="Pewangi">${fmtDelta(it.pewangi)}</td>
             <td data-label="Plastik">${fmtDelta(it.plastik)}</td>
         </tr>`).join("");
+    renderPreviousStock();
 }
+
+
+// Menghitung kembali saldo stok pada akhir tanggal yang dipilih.
+// Pergerakan setelah tanggal tersebut dibalik tanpa mengubah stok saat ini.
+function renderPreviousStock() {
+    const picker = getEl("stockPreviousDate");
+    if (!picker) return;
+    const selectedISO = picker.value;
+    if (!selectedISO) return;
+    const todayISO = dmyToIso(formatTanggal(new Date()));
+    if (selectedISO >= todayISO) {
+        getEl("stockPreviousNote").textContent = "Pilih tanggal sebelum hari ini untuk melihat riwayat stok.";
+        STOCK_ITEMS.forEach(item => { getEl("prevStock_" + item.key).textContent = "—"; });
+        return;
+    }
+
+    const historical = {};
+    STOCK_ITEMS.forEach(item => { historical[item.key] = toQty(stock[item.key]); });
+
+    // Balikkan seluruh transaksi yang memotong stok setelah tanggal pilihan.
+    data.forEach(it => {
+        if (dmyToIso(it.tanggal) > selectedISO && it.stokDipakai) {
+            STOCK_ITEMS.forEach(item => {
+                historical[item.key] += toQty(it.stokDipakai[item.key]);
+            });
+        }
+    });
+
+    // Balikkan penambahan/koreksi stok setelah tanggal pilihan.
+    stockLog.forEach(log => {
+        if (dmyToIso(log.tanggal) > selectedISO) {
+            STOCK_ITEMS.forEach(item => {
+                historical[item.key] -= Number(log[item.key]) || 0;
+            });
+        }
+    });
+
+    STOCK_ITEMS.forEach(item => {
+        getEl("prevStock_" + item.key).textContent = Math.max(0, historical[item.key]) + " Pcs";
+    });
+    getEl("stockPreviousNote").textContent =
+        "Saldo stok akhir tanggal " + isoToDmy(selectedISO) +
+        ". Riwayat dihitung dari stok sekarang dan seluruh transaksi serta perubahan stok yang masih tersimpan.";
+}
+
+function setDefaultPreviousStockDate() {
+    const picker = getEl("stockPreviousDate");
+    if (!picker || picker.value) return;
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    picker.value = `${yesterday.getFullYear()}-${pad(yesterday.getMonth() + 1)}-${pad(yesterday.getDate())}`;
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() - 1);
+    picker.max = `${maxDate.getFullYear()}-${pad(maxDate.getMonth() + 1)}-${pad(maxDate.getDate())}`;
+    renderPreviousStock();
+}
+getEl("stockPreviousDate").addEventListener("change", renderPreviousStock);
+
+// Buka/tutup riwayat stok melalui tombol kaca pembesar pada navigasi Stock.
+getEl("stockPreviousOpenBtn").addEventListener("click", () => {
+    setDefaultPreviousStockDate();
+    getEl("stockPreviousModal").style.display = "flex";
+    document.body.classList.add("fs-lock");
+});
+function closePreviousStockModal() {
+    getEl("stockPreviousModal").style.display = "none";
+    document.body.classList.remove("fs-lock");
+}
+getEl("stockPreviousCloseBtn").addEventListener("click", closePreviousStockModal);
+getEl("stockPreviousModal").addEventListener("click", e => {
+    if (e.target === getEl("stockPreviousModal")) closePreviousStockModal();
+});
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && getEl("stockPreviousModal").style.display !== "none") closePreviousStockModal();
+});
 
 getEl("stockForm").addEventListener("submit", function(e) {
     e.preventDefault();
