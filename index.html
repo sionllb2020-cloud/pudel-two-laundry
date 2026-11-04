@@ -1043,13 +1043,27 @@ body.fs-lock { overflow: hidden; }
 
 /* Pengeluaran: riwayat sebelum hari ini hanya tampil saat diperbesar (kaca perbesar) */
 #expensePrevSection { display: none; }
-#expDateFilter { display: none; }
+#expRangeFilter { display: none; }
 #expenseCard:fullscreen #expensePrevSection,
 #expenseCard:-webkit-full-screen #expensePrevSection,
 #expenseCard.fs-fallback #expensePrevSection { display: block; }
-#expenseCard:fullscreen #expDateFilter,
-#expenseCard:-webkit-full-screen #expDateFilter,
-#expenseCard.fs-fallback #expDateFilter { display: block; }
+#expenseCard:fullscreen #expRangeFilter,
+#expenseCard:-webkit-full-screen #expRangeFilter,
+#expenseCard.fs-fallback #expRangeFilter { display: flex; }
+/* Filter rentang tanggal (hanya tampil saat kaca pembesar aktif) */
+#expRangeFilter { align-items: center; flex-wrap: wrap; gap: 8px; }
+#expRangeFilter label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #28465A; }
+#expRangeFilter .date-filter { width: 150px; }
+#expRangeReset { height: 42px; padding: 0 14px; border: 1px solid #E6D9A8; border-radius: 10px; background: #fff; color: #28465A; font-size: 13px; font-weight: 800; cursor: pointer; }
+body.dark-theme #expRangeFilter label { color: #D2DFEC; }
+body.dark-theme #expRangeReset { background: #102331; color: #eaf4fa; border-color: #496171; }
+@media (max-width: 650px) {
+    #expRangeFilter { display: none; }
+    #expenseCard.fs-fallback #expRangeFilter { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+    #expRangeFilter label { flex-direction: column; align-items: stretch; gap: 4px; }
+    #expRangeFilter .date-filter { width: 100%; }
+    #expRangeReset { grid-column: 1 / -1; height: 44px; }
+}
 #expenseCard:fullscreen { overflow: auto; margin: 0; border-radius: 0; padding: 18px; background: #fff; }
 body.dark-theme #expenseCard:fullscreen { background: #17242E; color: #EAF2F6; }
 #expenseCard.fs-fallback { position: fixed; inset: 0; z-index: 9000; overflow: auto; margin: 0; border-radius: 0; padding: 14px; background: #fff; max-width: none; width: auto; -webkit-overflow-scrolling: touch; }
@@ -2039,8 +2053,9 @@ body.dark-theme #stockPreviousModal #stockPreviousNote { background: #203442; bo
                     <strong id="expNet">Rp 0</strong>
                 </div>
                 <div class="dashboard-card dark">
-                    <h3>Pengeluaran (Semua Tanggal)</h3>
+                    <h3>Total Pengeluaran Hari Ini</h3>
                     <strong id="expAll">Rp 0</strong>
+                    <small id="expAllDate"></small>
                 </div>
             </div>
         </div>
@@ -2067,7 +2082,11 @@ body.dark-theme #stockPreviousModal #stockPreviousNote { background: #203442; bo
                     </button>
                 </div>
                 <div class="filter-area">
-                    <input type="date" id="expDateFilter" class="date-filter" title="Filter tanggal untuk riwayat sebelum hari ini">
+                    <div id="expRangeFilter">
+                        <label>Dari <input type="date" id="expDateFrom" class="date-filter" title="Tanggal awal"></label>
+                        <label>Sampai <input type="date" id="expDateTo" class="date-filter" title="Tanggal akhir"></label>
+                        <button type="button" id="expRangeReset">Semua Tanggal</button>
+                    </div>
                     <input type="text" id="expSearch" class="search-box" placeholder="Cari nama barang...">
                 </div>
             </div>
@@ -2082,7 +2101,7 @@ body.dark-theme #stockPreviousModal #stockPreviousNote { background: #203442; bo
             <div class="exp-total" id="expTodayTotal">Total Pengeluaran Hari Ini: Rp 0</div>
 
             <div id="expensePrevSection">
-            <h3 class="sub-title">Riwayat Pengeluaran Sebelum Hari Ini</h3>
+            <h3 class="sub-title" id="expPrevTitle">Riwayat Pengeluaran Sebelum Hari Ini</h3>
             <div class="table-wrapper">
                 <table class="history-table compact-table">
                     <thead><tr>
@@ -5338,19 +5357,31 @@ function refreshExpenseUI() {
     renderAdminExpenseList();
     const today = formatTanggal(new Date());
     const q = (getEl("expSearch").value || "").toLowerCase().trim();
-    const d = getEl("expDateFilter").value;
+    let dFrom = getEl("expDateFrom").value;
+    let dTo = getEl("expDateTo").value;
+    if (dFrom && dTo && dFrom > dTo) { const tmp = dFrom; dFrom = dTo; dTo = tmp; }
+    const hasRange = !!(dFrom || dTo);
     const matches = e => !q || String(e.nama || "").toLowerCase().includes(q);
 
     const todayList = expenses.filter(e => e.tanggal === today && matches(e));
-    let prevList = expenses.filter(e => e.tanggal !== today && matches(e));
-    if (d) prevList = prevList.filter(e => dmyToIso(e.tanggal) === d);
+    // Tanpa rentang: semua riwayat sebelum hari ini. Dengan rentang: semua data pada tanggal dari-sampai.
+    const inRange = e => {
+        const iso = dmyToIso(e.tanggal);
+        return (!dFrom || iso >= dFrom) && (!dTo || iso <= dTo);
+    };
+    const prevList = hasRange
+        ? expenses.filter(e => matches(e) && inRange(e))
+        : expenses.filter(e => e.tanggal !== today && matches(e));
+    getEl("expPrevTitle").textContent = hasRange
+        ? "Riwayat Pengeluaran " + (dFrom ? isoToDmy(dFrom) : "awal") + " s/d " + (dTo ? isoToDmy(dTo) : "sekarang")
+        : "Riwayat Pengeluaran Sebelum Hari Ini";
 
     getEl("expenseBody").innerHTML = todayList.length
         ? todayList.map(expenseRowHTML).join("")
         : '<tr><td colspan="5" class="empty">Belum ada pengeluaran untuk hari ini.</td></tr>';
     getEl("expensePrevBody").innerHTML = prevList.length
         ? prevList.map(expenseRowHTML).join("")
-        : '<tr><td colspan="5" class="empty">Belum ada riwayat pengeluaran untuk tanggal sebelum hari ini.</td></tr>';
+        : (hasRange ? '<tr><td colspan="5" class="empty">Tidak ada pengeluaran pada rentang tanggal tersebut.</td></tr>' : '<tr><td colspan="5" class="empty">Belum ada riwayat pengeluaran untuk tanggal sebelum hari ini.</td></tr>');
 
     const sum = list => list.reduce((t, e) => t + (Number(e.jumlah) || 0), 0);
     getEl("expTodayTotal").textContent = "Total Pengeluaran Hari Ini: " + formatRupiah(sum(todayList));
@@ -5364,7 +5395,8 @@ function refreshExpenseUI() {
     getEl("expToday").textContent = formatRupiah(expTodaySum);
     getEl("expTodayCount").textContent = expTodayAll.length + " pembelian";
     getEl("expNet").textContent = formatRupiah(grossToday - expTodaySum);
-    getEl("expAll").textContent = formatRupiah(sum(expenses));
+    getEl("expAll").textContent = formatRupiah(expTodaySum);
+    getEl("expAllDate").textContent = "Tanggal " + today;
 }
 
 function resetExpenseForm() {
@@ -5418,7 +5450,13 @@ getEl("expSearch").addEventListener("input", refreshExpenseUI);
     });
 })();
 
-getEl("expDateFilter").addEventListener("change", refreshExpenseUI);
+getEl("expDateFrom").addEventListener("change", refreshExpenseUI);
+getEl("expDateTo").addEventListener("change", refreshExpenseUI);
+getEl("expRangeReset").addEventListener("click", function() {
+    getEl("expDateFrom").value = "";
+    getEl("expDateTo").value = "";
+    refreshExpenseUI();
+});
 
 // ---- Edit / Hapus Pengeluaran (hanya di Panel Edit Data) ----
 function hideExpenseEditBox() {
